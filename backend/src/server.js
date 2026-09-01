@@ -107,6 +107,12 @@ app.use(
   "/api/industry-partners",
   industryRoutes
 );
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "SamadhanSetu Backend is running 🚀"
+  });
+});
 
 // ==========================================
 // HEALTH CHECK
