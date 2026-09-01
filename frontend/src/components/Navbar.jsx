@@ -63,7 +63,7 @@ const Navbar = () => {
           onClick={closeMenu}
         >
           <img
-            src="/samadhan-setu-logo.png" 
+            src="./public/samadhan-setu-logo.png" 
             alt="SamadhanSetu"
             className="navbar-logo-image"
           />
