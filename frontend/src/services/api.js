@@ -1,13 +1,12 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Automatically attach JWT token
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -23,8 +22,6 @@ API.interceptors.request.use(
   }
 );
 
-// ==================== AUTH ====================
-
 // Login
 export const loginUser = async (userData) => {
   const response = await API.post("/auth/login", userData);
@@ -37,7 +34,7 @@ export const registerUser = async (userData) => {
   return response.data;
 };
 
-// Get current logged-in user
+// Current user
 export const getCurrentUser = async () => {
   const response = await API.get("/auth/me");
   return response.data;
@@ -48,7 +45,5 @@ export const logoutUser = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
 };
-
-// ==================== DEFAULT EXPORT ====================
 
 export default API;
