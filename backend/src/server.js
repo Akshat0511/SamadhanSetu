@@ -39,14 +39,28 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://samadhan-setu-eosin.vercel.app",
-    ],
+    origin: function (origin, callback) {
+      // Postman / server-to-server requests
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Local development
+      if (origin === "http://localhost:5173") {
+        return callback(null, true);
+      }
+
+      // All Vercel deployments
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      // Reject other origins
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
-
 // ==========================================
 // BODY PARSER
 // ==========================================
