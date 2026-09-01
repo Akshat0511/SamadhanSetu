@@ -1,0 +1,777 @@
+
+/* =========================================
+   GOVERNMENT DASHBOARD
+========================================= */
+
+.government-dashboard {
+  min-height: 100vh;
+  padding: 120px 20px 70px;
+  background: #f7f9fc;
+}
+
+.dashboard-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.dashboard-header {
+  margin-bottom: 32px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.portal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  margin-bottom: 10px;
+  border-radius: 999px;
+  background: #eaf2ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.dashboard-header p {
+  max-width: 680px;
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.primary-button {
+  color: white;
+  background: #2563eb;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.18);
+}
+
+.primary-button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.secondary-button {
+  color: #111827;
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+
+.secondary-button:hover {
+  background: #f3f4f6;
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+.error-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   STAT GRID
+========================================= */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+
+/* =========================================
+   OVERVIEW
+========================================= */
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.dashboard-panel {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.04);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.panel-header h2,
+.panel-title h2,
+.section-heading h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.panel-header p,
+.panel-title p,
+.section-heading p {
+  margin: 5px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.view-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.view-link:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================
+   CHALLENGES
+========================================= */
+
+.challenge-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.challenge-item {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.challenge-item:last-child {
+  border-bottom: none;
+}
+
+.challenge-item:hover {
+  background: #f8fafc;
+}
+
+.empty-state {
+  padding: 50px 20px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.empty-state svg {
+  margin: 0 auto;
+}
+
+.empty-state h3 {
+  margin: 12px 0 5px;
+  color: #111827;
+  font-size: 14px;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+
+/* =========================================
+   PANEL TITLE
+========================================= */
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.priority-panel,
+.info-panel {
+  padding: 20px;
+}
+
+.panel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #eaf2ff;
+  color: #2563eb;
+}
+
+.panel-icon.green {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+
+/* =========================================
+   PRIORITY
+========================================= */
+
+.priority-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.priority-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-radius: 13px;
+}
+
+.priority-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.priority-card strong {
+  color: #111827;
+  font-size: 14px;
+}
+
+.priority-card span {
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.priority-card b {
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.priority-card.critical {
+  background: #fef2f2;
+}
+
+.priority-card.critical b {
+  color: #dc2626;
+}
+
+.priority-card.high {
+  background: #fff7ed;
+}
+
+.priority-card.high b {
+  color: #ea580c;
+}
+
+.priority-card.active {
+  background: #eff6ff;
+}
+
+.priority-card.active b {
+  color: #2563eb;
+}
+
+
+/* =========================================
+   SECTIONS
+========================================= */
+
+.dashboard-section {
+  margin-top: 30px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+
+/* =========================================
+   MINI CARDS
+========================================= */
+
+.mini-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.mini-dashboard-card {
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.04);
+  transition: 0.2s ease;
+}
+
+.mini-dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.mini-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mini-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #eaf2ff;
+  color: #2563eb;
+}
+
+.mini-card-top strong {
+  color: #111827;
+  font-size: 27px;
+  font-weight: 800;
+}
+
+.mini-dashboard-card p {
+  margin: 15px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   ACTIONS
+========================================= */
+
+.actions-panel {
+  margin-top: 30px;
+  padding: 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.04);
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 15px;
+  background: #f8fafc;
+  color: inherit;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.quick-action:hover {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  transform: translateY(-2px);
+}
+
+.quick-action-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.quick-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  background: #eaf2ff;
+  color: #2563eb;
+}
+
+.quick-action h3 {
+  margin: 1px 0 5px;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.quick-action p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.quick-open {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+/* =========================================
+   BOTTOM GRID
+========================================= */
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 30px;
+}
+
+
+/* =========================================
+   DISTRICTS
+========================================= */
+
+.district-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.district-tag {
+  padding: 7px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.empty-text {
+  margin-top: 22px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+
+/* =========================================
+   RESOLUTION
+========================================= */
+
+.resolution {
+  margin-top: 25px;
+}
+
+.resolution-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 9px;
+}
+
+.resolution-heading span {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.resolution-heading strong {
+  color: #111827;
+  font-size: 14px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 11px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e7eb;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: #2563eb;
+  transition: width 0.5s ease;
+}
+
+.impact-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.impact-values div {
+  padding: 13px;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.impact-values span {
+  display: block;
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.impact-values strong {
+  display: block;
+  margin-top: 5px;
+  color: #111827;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
+
+.loading-container {
+  padding-top: 30px;
+}
+
+.loading-title,
+.loading-subtitle,
+.loading-card,
+.loading-large {
+  background: linear-gradient(
+    90deg,
+    #e5e7eb 25%,
+    #f3f4f6 50%,
+    #e5e7eb 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.loading-title {
+  width: 300px;
+  height: 42px;
+  border-radius: 8px;
+}
+
+.loading-subtitle {
+  width: 500px;
+  max-width: 100%;
+  height: 20px;
+  margin-top: 12px;
+  border-radius: 7px;
+}
+
+.loading-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.loading-card {
+  height: 130px;
+  border-radius: 18px;
+}
+
+.loading-large {
+  width: 100%;
+  height: 350px;
+  margin-top: 25px;
+  border-radius: 18px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+  .stats-grid,
+  .mini-card-grid,
+  .action-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .government-dashboard {
+    padding: 105px 14px 50px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-header h1 {
+    font-size: 30px;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions a {
+    flex: 1;
+  }
+
+  .stats-grid,
+  .mini-card-grid,
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-header {
+    align-items: flex-start;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .section-heading .view-link {
+    display: none;
+  }
+
+  .actions-panel {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .government-dashboard {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 27px;
+  }
+
+  .dashboard-header p {
+    font-size: 13px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+  }
+
+  .header-actions a {
+    width: 100%;
+  }
+
+  .panel-header {
+    padding: 16px;
+  }
+
+  .priority-panel,
+  .info-panel {
+    padding: 16px;
+  }
+
+  .impact-values {
+    grid-template-columns: 1fr;
+  }
+}
+

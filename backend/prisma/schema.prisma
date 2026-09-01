@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  CITIZEN
+  STUDENT
+  FACULTY
+  UNIVERSITY
+  INDUSTRY
+  GOVERNMENT
+  ADMIN
+}
+
+enum ChallengeStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  password     String
+  phone        String?
+  role         UserRole @default(CITIZEN)
+  district     String?
+  organization String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  challenges Challenge[]
+  projects   ProjectMember[]
+}
+
+model Challenge {
+  id                 String          @id @default(cuid())
+  title              String
+  description        String
+  category           String
+  district           String
+  location           String?
+  latitude           Float?
+  longitude          Float?
+  affectedPopulation Int?
+  priority           Priority        @default(MEDIUM)
+  status             ChallengeStatus @default(PENDING)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  aiAnalysis AIAnalysis?
+  project    Project?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AIAnalysis {
+  id                      String   @id @default(cuid())
+  challengeId             String   @unique
+  category                String
+  confidence              Float
+  priority                Priority
+  duplicateDetected       Boolean
+  duplicateScore          Float?
+  recommendedSkills       String[]
+  recommendedUniversities String[]
+  impactScore             Float?
+
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+}
+
+model University {
+  id            String   @id @default(cuid())
+  name          String
+  district      String
+  description   String?
+  researchAreas String[]
+  departments   String[]
+
+  projects Project[]
+}
+
+model IndustryPartner {
+  id          String   @id @default(cuid())
+  name        String
+  industry    String
+  expertise   String[]
+  description String?
+
+  projects Project[]
+}
+
+model Project {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  progress    Int    @default(0)
+
+  challengeId  String  @unique
+  universityId String?
+  industryId   String?
+
+  challenge  Challenge        @relation(fields: [challengeId], references: [id])
+  university University?      @relation(fields: [universityId], references: [id])
+  industry   IndustryPartner? @relation(fields: [industryId], references: [id])
+
+  members    ProjectMember[]
+  milestones Milestone[]
+
+  createdAt DateTime @default(now())
+}
+
+model ProjectMember {
+  id        String @id @default(cuid())
+  projectId String
+  userId    String
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+}
+
+model Milestone {
+  id       String @id @default(cuid())
+  title    String
+  status   String
+  progress Int    @default(0)
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+}
+
+model Solution {
+  id              String   @id @default(cuid())
+  name            String
+  description     String
+  category        String
+  district        String
+  peopleBenefited Int      @default(0)
+  waterSaved      Float?
+  costReduction   Float?
+
+  createdAt DateTime @default(now())
+}
+
+model ImpactMetric {
+  id       String   @id @default(cuid())
+  metric   String
+  value    Float
+  unit     String?
+  district String?
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  message   String
+  read      Boolean  @default(false)
+  userId    String
+  createdAt DateTime @default(now())
+}
