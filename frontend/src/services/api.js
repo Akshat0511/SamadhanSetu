@@ -7,6 +7,7 @@ const API = axios.create({
   },
 });
 
+// Automatically attach JWT token
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -22,25 +23,28 @@ API.interceptors.request.use(
   }
 );
 
-// Login
+// LOGIN
 export const loginUser = async (userData) => {
   const response = await API.post("/auth/login", userData);
+
   return response.data;
 };
 
-// Register
+// REGISTER
 export const registerUser = async (userData) => {
   const response = await API.post("/auth/register", userData);
+
   return response.data;
 };
 
-// Current user
+// CURRENT USER
 export const getCurrentUser = async () => {
   const response = await API.get("/auth/me");
+
   return response.data;
 };
 
-// Logout
+// LOGOUT
 export const logoutUser = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
