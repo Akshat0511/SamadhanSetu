@@ -1,37 +1,41 @@
 const express = require("express");
 
-const router = express.Router();
-
 const {
-  createChallenge,
   getChallenges,
   getChallengeById,
+  createChallenge,
   updateChallengeStatus,
   getMyChallenges,
 } = require("../controllers/challengeController");
 
-const { protect } = require("../middleware/authMiddleware");
+const {
+  uploadChallengeImages,
+} = require("../controllers/challengeImageController");
 
-// =====================================================
-// PUBLIC ROUTES
-// =====================================================
+const protect = require("../middleware/authMiddleware");
+const upload = require("../middleware/upload");
+
+const router = express.Router();
 
 // Get all challenges
 router.get("/", getChallenges);
 
+// Get logged-in user's challenges
+router.get("/my", protect, getMyChallenges);
+
 // Get single challenge
 router.get("/:id", getChallengeById);
-
-
-// =====================================================
-// PROTECTED ROUTES
-// =====================================================
 
 // Create challenge
 router.post("/", protect, createChallenge);
 
-// Get logged-in user's challenges
-router.get("/my", protect, getMyChallenges);
+// Upload challenge images
+router.post(
+  "/:id/images",
+  protect,
+  upload.array("images", 5),
+  uploadChallengeImages
+);
 
 // Update challenge status
 router.put("/:id/status", protect, updateChallengeStatus);
