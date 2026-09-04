@@ -1,22 +1,17 @@
-// src/pages/Challenges.jsx
 
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertCircle,
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
   Filter,
   Loader2,
-  MapPin,
   RefreshCw,
   Search,
   Target,
   X,
 } from "lucide-react";
 
-
+import ChallengeCard from "../components/ChallengeCard";
 import "./Challenges.css";
 
 const API_BASE_URL =
@@ -34,16 +29,19 @@ function Challenges() {
 
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    fetchChallenges();
-  }, []);
+  // =====================================================
+  // FETCH CHALLENGES
+  // =====================================================
 
   const fetchChallenges = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`${API_BASE_URL}/challenges`);
+      const response = await fetch(
+        `${API_BASE_URL}/challenges`
+      );
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -52,9 +50,15 @@ function Challenges() {
         );
       }
 
-      const challengeData = Array.isArray(data)
-        ? data
-        : data.challenges || [];
+      let challengeData = [];
+
+      if (Array.isArray(data)) {
+        challengeData = data;
+      } else if (Array.isArray(data.challenges)) {
+        challengeData = data.challenges;
+      } else if (Array.isArray(data.data)) {
+        challengeData = data.data;
+      }
 
       setChallenges(challengeData);
     } catch (err) {
@@ -68,13 +72,30 @@ function Challenges() {
     }
   };
 
+  // =====================================================
+  // LOAD CHALLENGES
+  // =====================================================
+
+  useEffect(() => {
+    fetchChallenges();
+  }, []);
+
+  // =====================================================
+  // CATEGORIES
+  // =====================================================
+
   const categories = useMemo(() => {
     const values = challenges
       .map((challenge) => challenge.category)
-      .filter(Boolean);
+      .filter(Boolean)
+      .map((value) => String(value).toUpperCase());
 
     return ["ALL", ...new Set(values)];
   }, [challenges]);
+
+  // =====================================================
+  // FILTER CHALLENGES
+  // =====================================================
 
   const filteredChallenges = useMemo(() => {
     const searchText = search.trim().toLowerCase();
@@ -97,7 +118,7 @@ function Challenges() {
       ).toUpperCase();
 
       const challengeStatus = String(
-        challenge.status || "OPEN"
+        challenge.status || "PENDING"
       ).toUpperCase();
 
       const challengePriority = String(
@@ -140,6 +161,10 @@ function Challenges() {
     priority,
   ]);
 
+  // =====================================================
+  // CLEAR FILTERS
+  // =====================================================
+
   const clearFilters = () => {
     setSearch("");
     setCategory("ALL");
@@ -148,431 +173,279 @@ function Challenges() {
   };
 
   const hasActiveFilters =
-    search ||
+    Boolean(search) ||
     category !== "ALL" ||
     status !== "ALL" ||
     priority !== "ALL";
 
-  /* =========================
-     LOADING
-  ========================= */
+  // =====================================================
+  // LOADING
+  // =====================================================
 
   if (loading) {
     return (
-      <>
-
-
-        <main className="challenges-page loading-page">
-          <div className="loading-container">
-            <div className="loading-icon">
-              <Loader2 />
-            </div>
-
-            <h2>Loading Challenges</h2>
-
-            <p>
-              Fetching challenges from SamadhanSetu...
-            </p>
+      <main className="challenges-page loading-page">
+        <div className="loading-container">
+          <div className="loading-icon">
+            <Loader2 />
           </div>
-        </main>
 
-       
-      </>
+          <h2>Loading Challenges</h2>
+
+          <p>
+            Fetching challenges from SamadhanSetu...
+          </p>
+        </div>
+      </main>
     );
   }
 
-  /* =========================
-     ERROR
-  ========================= */
+  // =====================================================
+  // ERROR
+  // =====================================================
 
   if (error) {
     return (
-      <>
-       
+      <main className="challenges-page error-page">
+        <div className="error-container">
+          <div className="error-card">
+            <div className="error-icon">
+              <AlertCircle />
+            </div>
 
-        <main className="challenges-page error-page">
-          <div className="error-container">
-            <div className="error-card">
-              <div className="error-icon">
-                <AlertCircle />
-              </div>
+            <h1>Unable to Load Challenges</h1>
 
-              <h1>Unable to Load Challenges</h1>
+            <p>{error}</p>
 
-              <p>{error}</p>
+            <div className="error-actions">
+              <button
+                type="button"
+                onClick={fetchChallenges}
+                className="primary-button"
+              >
+                <RefreshCw />
+                Try Again
+              </button>
 
-              <div className="error-actions">
-                <button
-                  type="button"
-                  onClick={fetchChallenges}
-                  className="primary-button"
-                >
-                  <RefreshCw />
-                  Try Again
-                </button>
-
-                <Link
-                  to="/"
-                  className="secondary-button"
-                >
-                  Go Home
-                </Link>
-              </div>
+              <Link
+                to="/"
+                className="secondary-button"
+              >
+                Go Home
+              </Link>
             </div>
           </div>
-        </main>
-
-   
-      </>
+        </div>
+      </main>
     );
   }
 
+  // =====================================================
+  // MAIN PAGE
+  // =====================================================
+
   return (
-    <>
-    
+    <main className="challenges-page">
 
-      <main className="challenges-page">
+      {/* HERO */}
 
-        {/* =========================
-            HERO
-        ========================= */}
+      <section className="challenges-hero">
+        <div className="container">
 
-        <section className="challenges-hero">
-          <div className="container">
-
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Target />
-                Community Challenges
-              </div>
-
-              <h1>
-                Discover Problems.
-                <span>Build Solutions.</span>
-              </h1>
-
-              <p>
-                Explore real-world challenges submitted by
-                communities across Jharkhand and discover
-                opportunities for collaborative innovation.
-              </p>
+          <div className="hero-content">
+            <div className="hero-badge">
+              <Target />
+              Community Challenges
             </div>
 
-            {/* Stats */}
+            <h1>
+              Discover Problems.
+              <span>Build Solutions.</span>
+            </h1>
 
-            <div className="stats-grid">
+            <p>
+              Explore real-world challenges submitted
+              by communities across Jharkhand and
+              discover opportunities for collaborative
+              innovation.
+            </p>
+          </div>
 
-              <Stat
-                label="Total Challenges"
-                value={challenges.length}
-              />
+          {/* STATS */}
 
-              <Stat
-                label="Showing"
-                value={filteredChallenges.length}
-              />
+          <div className="stats-grid">
+            <Stat
+              label="Total Challenges"
+              value={challenges.length}
+            />
 
-              <Stat
-                label="Open Challenges"
-                value={
-                  challenges.filter(
-                    (item) =>
-                      String(
-                        item.status || "OPEN"
-                      ).toUpperCase() === "OPEN"
-                  ).length
+            <Stat
+              label="Showing"
+              value={filteredChallenges.length}
+            />
+
+            <Stat
+              label="Pending Challenges"
+              value={
+                challenges.filter(
+                  (item) =>
+                    String(
+                      item.status || "PENDING"
+                    ).toUpperCase() === "PENDING"
+                ).length
+              }
+            />
+          </div>
+
+        </div>
+      </section>
+
+      {/* MAIN */}
+
+      <section className="challenges-main container">
+
+        {/* SEARCH + FILTER */}
+
+        <div className="filter-box">
+
+          <div className="search-filter-row">
+
+            <div className="search-wrapper">
+              <Search />
+
+              <input
+                type="text"
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
                 }
+                placeholder="Search challenges, districts, categories..."
               />
 
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="clear-search"
+                >
+                  <X />
+                </button>
+              )}
             </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowFilters((value) => !value)
+              }
+              className="mobile-filter-button"
+            >
+              <Filter />
+              Filters
+            </button>
 
           </div>
-        </section>
 
-        {/* =========================
-            MAIN
-        ========================= */}
+          {/* FILTERS */}
 
-        <section className="challenges-main container">
+          <div
+            className={`filters-grid ${
+              showFilters ? "show-mobile" : ""
+            }`}
+          >
+            <FilterSelect
+              label="Category"
+              value={category}
+              onChange={setCategory}
+              options={categories}
+            />
 
-          {/* Search + Filters */}
+            <FilterSelect
+              label="Status"
+              value={status}
+              onChange={setStatus}
+              options={[
+                "ALL",
+                "PENDING",
+                "UNDER_REVIEW",
+                "VERIFIED",
+                "ASSIGNED",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "REJECTED",
+              ]}
+            />
 
-          <div className="filter-box">
+            <FilterSelect
+              label="Priority"
+              value={priority}
+              onChange={setPriority}
+              options={[
+                "ALL",
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL",
+              ]}
+            />
+          </div>
 
-            <div className="search-filter-row">
+          {/* FILTER RESULT */}
 
-              <div className="search-wrapper">
-                <Search />
-
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) =>
-                    setSearch(e.target.value)
-                  }
-                  placeholder="Search challenges, districts, categories..."
-                />
-
-                {search && (
-                  <button
-                    type="button"
-                    onClick={() => setSearch("")}
-                    className="clear-search"
-                  >
-                    <X />
-                  </button>
-                )}
-              </div>
+          {hasActiveFilters && (
+            <div className="filter-result-bar">
+              <p>
+                {filteredChallenges.length}{" "}
+                result
+                {filteredChallenges.length !== 1
+                  ? "s"
+                  : ""}{" "}
+                found
+              </p>
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowFilters((value) => !value)
-                }
-                className="mobile-filter-button"
+                onClick={clearFilters}
               >
-                <Filter />
-                Filters
+                Clear filters
               </button>
-
             </div>
-
-            {/* Filters */}
-
-            <div
-              className={`filters-grid ${
-                showFilters ? "show-mobile" : ""
-              }`}
-            >
-
-              <FilterSelect
-                label="Category"
-                value={category}
-                onChange={setCategory}
-                options={categories}
-              />
-
-              <FilterSelect
-                label="Status"
-                value={status}
-                onChange={setStatus}
-                options={[
-                  "ALL",
-                  "OPEN",
-                  "ASSIGNED",
-                  "IN_PROGRESS",
-                  "RESOLVED",
-                  "CLOSED",
-                ]}
-              />
-
-              <FilterSelect
-                label="Priority"
-                value={priority}
-                onChange={setPriority}
-                options={[
-                  "ALL",
-                  "LOW",
-                  "MEDIUM",
-                  "HIGH",
-                  "CRITICAL",
-                ]}
-              />
-
-            </div>
-
-            {hasActiveFilters && (
-              <div className="filter-result-bar">
-
-                <p>
-                  {filteredChallenges.length} result
-                  {filteredChallenges.length !== 1
-                    ? "s"
-                    : ""}{" "}
-                  found
-                </p>
-
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                >
-                  Clear filters
-                </button>
-
-              </div>
-            )}
-
-          </div>
-
-          {/* =========================
-              RESULTS
-          ========================= */}
-
-          <div className="results-section">
-
-            {filteredChallenges.length === 0 ? (
-              <EmptyState
-                hasFilters={Boolean(hasActiveFilters)}
-                onClear={clearFilters}
-              />
-            ) : (
-              <div className="challenges-grid">
-
-                {filteredChallenges.map(
-                  (challenge) => (
-                    <ChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                    />
-                  )
-                )}
-
-              </div>
-            )}
-
-          </div>
-
-        </section>
-
-      </main>
-
-   
-   
-    </>
-  );
-}
-
-/* =========================================================
-   CHALLENGE CARD
-========================================================= */
-
-function ChallengeCard({ challenge }) {
-  const title =
-    challenge.title ||
-    challenge.name ||
-    "Untitled Challenge";
-
-  const description =
-    challenge.description ||
-    "No description available.";
-
-  const category =
-    challenge.category || "GENERAL";
-
-  const district =
-    challenge.district || "Jharkhand";
-
-  const status = String(
-    challenge.status || "OPEN"
-  ).toUpperCase();
-
-  const priority = String(
-    challenge.priority || "MEDIUM"
-  ).toUpperCase();
-
-  return (
-    <article className="challenge-card">
-
-      <div className="challenge-card-top">
-
-        <div className="card-label-row">
-
-          <span className="category-badge">
-            {category}
-          </span>
-
-          <PriorityBadge
-            priority={priority}
-          />
+          )}
 
         </div>
 
-        <h2>{title}</h2>
+        {/* RESULTS */}
 
-        <p className="challenge-description">
-          {description}
-        </p>
+        <div className="results-section">
 
-        <div className="challenge-location">
-          <MapPin />
-          {district}
+          {filteredChallenges.length === 0 ? (
+            <EmptyState
+              hasFilters={hasActiveFilters}
+              onClear={clearFilters}
+            />
+          ) : (
+            <div className="challenges-grid">
+              {filteredChallenges.map(
+                (challenge) => (
+                  <ChallengeCard
+                    key={challenge.id}
+                    challenge={challenge}
+                  />
+                )
+              )}
+            </div>
+          )}
+
         </div>
 
-      </div>
-
-      <div className="challenge-card-bottom">
-
-        <StatusBadge status={status} />
-
-        <Link
-          to={`/challenges/${challenge.id}`}
-          className="view-details"
-        >
-          View Details
-          <ArrowRight />
-        </Link>
-
-      </div>
-
-    </article>
+      </section>
+    </main>
   );
 }
 
-/* =========================================================
-   PRIORITY BADGE
-========================================================= */
-
-function PriorityBadge({ priority }) {
-  const classes = {
-    LOW: "priority-low",
-    MEDIUM: "priority-medium",
-    HIGH: "priority-high",
-    CRITICAL: "priority-critical",
-  };
-
-  return (
-    <span
-      className={`priority-badge ${
-        classes[priority] || "priority-low"
-      }`}
-    >
-      {priority}
-    </span>
-  );
-}
-
-/* =========================================================
-   STATUS BADGE
-========================================================= */
-
-function StatusBadge({ status }) {
-  const isOpen = status === "OPEN";
-  const isResolved = status === "RESOLVED";
-
-  return (
-    <span
-      className={`status-badge ${
-        isResolved
-          ? "status-resolved"
-          : isOpen
-          ? "status-open"
-          : "status-default"
-      }`}
-    >
-      {isResolved ? (
-        <CheckCircle2 />
-      ) : (
-        <Clock3 />
-      )}
-
-      {status.replaceAll("_", " ")}
-    </span>
-  );
-}
-
-/* =========================================================
-   FILTER SELECT
-========================================================= */
+// =====================================================
+// FILTER SELECT
+// =====================================================
 
 function FilterSelect({
   label,
@@ -607,25 +480,23 @@ function FilterSelect({
   );
 }
 
-/* =========================================================
-   STAT
-========================================================= */
+// =====================================================
+// STAT
+// =====================================================
 
 function Stat({ label, value }) {
   return (
     <div className="stat-card">
-
       <p>{label}</p>
 
       <strong>{value}</strong>
-
     </div>
   );
 }
 
-/* =========================================================
-   EMPTY STATE
-========================================================= */
+// =====================================================
+// EMPTY STATE
+// =====================================================
 
 function EmptyState({
   hasFilters,
@@ -661,3 +532,4 @@ function EmptyState({
 }
 
 export default Challenges;
+

@@ -1,24 +1,13 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// ===============================
-// Government
-// ===============================
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
 
-import GovernmentLogin from "./pages/government/GovernmentLogin";
-import GovernmentRegister from "./pages/government/GovernmentRegister";
-import GovernmentDashboard from "./pages/government/GovernmentDashboard";
-import AIMatching from "./pages/AIMatching/AIMatching";
-// ===============================
-// Components
-// ===============================
-
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import LogoutNavbar from "./components/LogoutNavbar";
-
-// ===============================
-// Public Pages
-// ===============================
+// =====================================================
+// PUBLIC PAGES
+// =====================================================
 
 import Home from "./pages/Home";
 import Challenges from "./pages/Challenges";
@@ -28,16 +17,30 @@ import Solutions from "./pages/Solutions";
 import Universities from "./pages/Universities";
 import Industries from "./pages/Industries";
 
-// ===============================
-// Auth Pages
-// ===============================
+// =====================================================
+// AUTH PAGES
+// =====================================================
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
-// ===============================
-// Dashboard Pages
-// ===============================
+// =====================================================
+// GOVERNMENT
+// =====================================================
+
+import GovernmentLogin from "./pages/government/GovernmentLogin";
+import GovernmentRegister from "./pages/government/GovernmentRegister";
+import GovernmentDashboard from "./pages/government/GovernmentDashboard";
+
+// =====================================================
+// AI MATCHING
+// =====================================================
+
+import AIMatching from "./pages/AIMatching/AIMatching";
+
+// =====================================================
+// DASHBOARDS
+// =====================================================
 
 import CitizenDashboard from "./pages/citizen/CitizenDashboard";
 import UniversityDashboard from "./pages/university/UniversityDashboard";
@@ -45,53 +48,78 @@ import IndustryDashboard from "./pages/industry/IndustryDashboard";
 import ProjectWorkspace from "./pages/university/ProjectWorkspace";
 
 // =====================================================
-// 404 PAGE
+// COMPONENTS
+// =====================================================
+
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import LogoutNavbar from "./components/LogoutNavbar";
+
+// =====================================================
+// 404
 // =====================================================
 
 function NotFound() {
   return (
     <div className="not-found-page">
+
       <div className="not-found-content">
+
         <h1>404</h1>
 
-        <h2>Page Not Found</h2>
+        <h2>
+          Page Not Found
+        </h2>
 
-        <p>The page you are looking for does not exist.</p>
+        <p>
+          The page you are looking for
+          does not exist.
+        </p>
 
-        <a href="/">Go Home</a>
+        <a href="/">
+          Go Home
+        </a>
+
       </div>
+
     </div>
   );
 }
 
 // =====================================================
 // PUBLIC LAYOUT
-// Navbar + Main Content + Footer
 // =====================================================
 
 function PublicLayout({ children }) {
   return (
     <div className="app-layout">
+
       <Navbar />
 
-      <main className="app-main">{children}</main>
+      <main className="app-main">
+        {children}
+      </main>
 
       <Footer />
+
     </div>
   );
 }
 
 // =====================================================
 // DASHBOARD LAYOUT
-// Navbar + Main Content
 // =====================================================
 
 function DashboardLayout({ children }) {
   return (
     <div className="dashboard-layout">
+
       <LogoutNavbar />
 
-      <main className="dashboard-main">{children}</main>
+      <main className="dashboard-main">
+        {children}
+      </main>
+
     </div>
   );
 }
@@ -103,9 +131,11 @@ function DashboardLayout({ children }) {
 function App() {
   return (
     <BrowserRouter>
+
       <Routes>
+
         {/* =================================================
-            PUBLIC ROUTES
+            HOME
         ================================================= */}
 
         <Route
@@ -117,6 +147,10 @@ function App() {
           }
         />
 
+        {/* =================================================
+            CHALLENGES LIST
+        ================================================= */}
+
         <Route
           path="/challenges"
           element={
@@ -125,6 +159,10 @@ function App() {
             </PublicLayout>
           }
         />
+
+        {/* =================================================
+            CHALLENGE DETAILS
+        ================================================= */}
 
         <Route
           path="/challenges/:id"
@@ -135,6 +173,10 @@ function App() {
           }
         />
 
+        {/* =================================================
+            SUBMIT CHALLENGE
+        ================================================= */}
+
         <Route
           path="/submit"
           element={
@@ -143,6 +185,10 @@ function App() {
             </DashboardLayout>
           }
         />
+
+        {/* =================================================
+            SOLUTIONS
+        ================================================= */}
 
         <Route
           path="/solutions"
@@ -153,6 +199,10 @@ function App() {
           }
         />
 
+        {/* =================================================
+            UNIVERSITIES
+        ================================================= */}
+
         <Route
           path="/universities"
           element={
@@ -161,6 +211,10 @@ function App() {
             </PublicLayout>
           }
         />
+
+        {/* =================================================
+            INDUSTRIES
+        ================================================= */}
 
         <Route
           path="/industries"
@@ -172,20 +226,40 @@ function App() {
         />
 
         {/* =================================================
-            AUTH ROUTES
+            AUTH
         ================================================= */}
 
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
         {/* =================================================
             GOVERNMENT AUTH
         ================================================= */}
 
-        <Route path="/government/login" element={<GovernmentLogin />} />
+        <Route
+          path="/government/login"
+          element={
+            <GovernmentLogin />
+          }
+        />
 
-        <Route path="/government/register" element={<GovernmentRegister />} />
+        <Route
+          path="/government/register"
+          element={
+            <GovernmentRegister />
+          }
+        />
+
+        {/* =================================================
+            AI MATCHING
+        ================================================= */}
 
         <Route
           path="/ai-matching/:challengeId"
@@ -195,6 +269,7 @@ function App() {
             </DashboardLayout>
           }
         />
+
         {/* =================================================
             CITIZEN DASHBOARD
         ================================================= */}
@@ -290,9 +365,12 @@ function App() {
             </PublicLayout>
           }
         />
+
       </Routes>
+
     </BrowserRouter>
   );
 }
 
 export default App;
+

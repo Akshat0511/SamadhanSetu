@@ -1,11 +1,14 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
+
 import {
   MapPin,
-  Clock,
+  Clock3,
   ArrowRight,
   AlertCircle,
   CheckCircle2,
+  Image as ImageIcon,
 } from "lucide-react";
 
 function ChallengeCard({ challenge }) {
@@ -16,6 +19,7 @@ function ChallengeCard({ challenge }) {
   const {
     id,
     title,
+    name,
     description,
     category,
     district,
@@ -23,140 +27,276 @@ function ChallengeCard({ challenge }) {
     status,
     createdAt,
     deadline,
+    images,
+    challengeImages,
   } = challenge;
 
-  // Priority styling
-  const priorityStyles = {
-    CRITICAL: "bg-red-100 text-red-700 border-red-200",
-    HIGH: "bg-orange-100 text-orange-700 border-orange-200",
-    MEDIUM: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    LOW: "bg-green-100 text-green-700 border-green-200",
-  };
+  const challengeTitle =
+    title || name || "Untitled Challenge";
 
-  // Status styling
-  const statusStyles = {
-    OPEN: "bg-blue-100 text-blue-700",
-    PENDING: "bg-yellow-100 text-yellow-700",
-    ASSIGNED: "bg-purple-100 text-purple-700",
-    IN_PROGRESS: "bg-indigo-100 text-indigo-700",
-    RESOLVED: "bg-green-100 text-green-700",
-    REJECTED: "bg-red-100 text-red-700",
-    COMPLETED: "bg-green-100 text-green-700",
-  };
+  const challengeDescription =
+    description || "No description available.";
 
-  const priorityClass =
-    priorityStyles[String(priority).toUpperCase()] ||
-    "bg-gray-100 text-gray-700 border-gray-200";
+  const challengeCategory =
+    category || "GENERAL";
 
-  const statusClass =
-    statusStyles[String(status).toUpperCase()] ||
-    "bg-gray-100 text-gray-700";
+  const challengeDistrict =
+    district || "Jharkhand";
 
-  // Format date
+  const challengePriority =
+    String(priority || "MEDIUM").toUpperCase();
+
+  const challengeStatus =
+    String(status || "PENDING").toUpperCase();
+
+  // =====================================================
+  // GET IMAGES
+  // =====================================================
+
+  const imageList = Array.isArray(images)
+    ? images
+    : Array.isArray(challengeImages)
+    ? challengeImages
+    : [];
+
+  const firstImage =
+    imageList.length > 0
+      ? imageList[0]
+      : null;
+
+  const imageUrl =
+    firstImage?.imageUrl ||
+    firstImage?.url ||
+    firstImage?.secure_url ||
+    null;
+
+  // =====================================================
+  // FORMAT DATE
+  // =====================================================
+
   const formatDate = (date) => {
-    if (!date) return null;
+    if (!date) {
+      return "";
+    }
 
-    try {
-      return new Date(date).toLocaleDateString("en-IN", {
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "";
+    }
+
+    return parsedDate.toLocaleDateString(
+      "en-IN",
+      {
         day: "numeric",
         month: "short",
         year: "numeric",
-      });
-    } catch {
-      return null;
-    }
+      }
+    );
   };
 
+  // =====================================================
+  // PRIORITY CLASSES
+  // =====================================================
+
+  const priorityClassMap = {
+    LOW: "priority-low",
+    MEDIUM: "priority-medium",
+    HIGH: "priority-high",
+    CRITICAL: "priority-critical",
+  };
+
+  // =====================================================
+  // STATUS CLASSES
+  // =====================================================
+
+  const statusClassMap = {
+    PENDING: "status-pending",
+    UNDER_REVIEW: "status-under-review",
+    VERIFIED: "status-verified",
+    ASSIGNED: "status-assigned",
+    IN_PROGRESS: "status-in-progress",
+    COMPLETED: "status-completed",
+    REJECTED: "status-rejected",
+    OPEN: "status-open",
+    RESOLVED: "status-resolved",
+  };
+
+  const priorityClass =
+    priorityClassMap[challengePriority] ||
+    "priority-medium";
+
+  const statusClass =
+    statusClassMap[challengeStatus] ||
+    "status-default";
+
+  const isCompleted =
+    challengeStatus === "COMPLETED" ||
+    challengeStatus === "RESOLVED";
+
+  // =====================================================
+  // CARD
+  // =====================================================
+
   return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-      
-      {/* ================= HEADER ================= */}
-      <div className="border-b border-gray-100 p-5">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          
-          {/* Category */}
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-            {category || "General"}
+    <article className="challenge-card">
+
+      {/* =================================================
+          IMAGE
+      ================================================= */}
+
+      <Link
+        to={`/challenges/${id}`}
+        className="challenge-card-image"
+      >
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={challengeTitle}
+            loading="lazy"
+            onError={(event) => {
+              event.currentTarget.style.display =
+                "none";
+
+              const fallback =
+                event.currentTarget.parentElement?.querySelector(
+                  ".no-image-placeholder"
+                );
+
+              if (fallback) {
+                fallback.style.display = "flex";
+              }
+            }}
+          />
+        ) : null}
+
+        <div
+          className="no-image-placeholder"
+          style={{
+            display: imageUrl
+              ? "none"
+              : "flex",
+          }}
+        >
+          <ImageIcon size={40} />
+
+          <span>
+            No Image Available
+          </span>
+        </div>
+
+        <div className="image-overlay" />
+
+        <div className="image-badges">
+
+          <span className="category-badge">
+            {challengeCategory}
           </span>
 
-          {/* Priority */}
-          {priority && (
-            <span
-              className={`rounded-full border px-3 py-1 text-xs font-bold ${priorityClass}`}
-            >
-              {priority}
-            </span>
-          )}
+          <span
+            className={`priority-badge ${priorityClass}`}
+          >
+            {challengePriority}
+          </span>
+
         </div>
+      </Link>
 
-        {/* Title */}
-        <h3 className="line-clamp-2 text-lg font-bold leading-snug text-gray-900 transition-colors group-hover:text-blue-600">
-          {title || "Untitled Challenge"}
-        </h3>
-      </div>
+      {/* =================================================
+          CARD CONTENT
+      ================================================= */}
 
-      {/* ================= CONTENT ================= */}
-      <div className="flex flex-1 flex-col p-5">
-        
-        {/* Description */}
-        <p className="mb-5 line-clamp-3 text-sm leading-relaxed text-gray-600">
-          {description || "No description available for this challenge."}
+      <div className="challenge-card-content">
+
+        <Link
+          to={`/challenges/${id}`}
+          className="challenge-title-link"
+        >
+          <h2>
+            {challengeTitle}
+          </h2>
+        </Link>
+
+        <p className="challenge-description">
+          {challengeDescription}
         </p>
 
-        {/* Location */}
-        {district && (
-          <div className="mb-3 flex items-center gap-2 text-sm text-gray-600">
-            <MapPin className="h-4 w-4 shrink-0 text-blue-600" />
-            <span>{district}, Jharkhand</span>
-          </div>
-        )}
+        {/* LOCATION */}
 
-        {/* Deadline */}
-        {deadline && (
-          <div className="mb-3 flex items-center gap-2 text-sm text-gray-600">
-            <Clock className="h-4 w-4 shrink-0 text-orange-500" />
-            <span>Deadline: {formatDate(deadline)}</span>
-          </div>
-        )}
+        <div className="challenge-location">
 
-        {/* Created Date */}
-        {createdAt && (
-          <div className="mb-4 text-xs text-gray-400">
-            Submitted {formatDate(createdAt)}
-          </div>
-        )}
+          <MapPin size={17} />
 
-        {/* Status */}
-        <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-4">
-          
-          <div className="flex items-center gap-2">
-            {String(status).toUpperCase() === "RESOLVED" ||
-            String(status).toUpperCase() === "COMPLETED" ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            ) : (
-              <AlertCircle className="h-4 w-4 text-blue-600" />
-            )}
+          <span>
+            {challengeDistrict}
+          </span>
 
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}
-            >
-              {status || "OPEN"}
-            </span>
-          </div>
-
-          {/* View Button */}
-          {id && (
-            <Link
-              to={`/challenges/${id}`}
-              className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold text-blue-600 transition-all hover:bg-blue-50"
-            >
-              View
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          )}
         </div>
+
+        {/* DEADLINE */}
+
+        {deadline && (
+          <div className="challenge-location">
+
+            <Clock3 size={17} />
+
+            <span>
+              Deadline:{" "}
+              {formatDate(deadline)}
+            </span>
+
+          </div>
+        )}
+
+        {/* CREATED DATE */}
+
+        {createdAt && (
+          <div className="challenge-created">
+            Submitted{" "}
+            {formatDate(createdAt)}
+          </div>
+        )}
+
       </div>
-    </div>
+
+      {/* =================================================
+          CARD FOOTER
+      ================================================= */}
+
+      <div className="challenge-card-bottom">
+
+        <span
+          className={`status-badge ${statusClass}`}
+        >
+
+          {isCompleted ? (
+            <CheckCircle2 size={16} />
+          ) : (
+            <AlertCircle size={16} />
+          )}
+
+          {challengeStatus.replaceAll(
+            "_",
+            " "
+          )}
+
+        </span>
+
+        <Link
+          to={`/challenges/${id}`}
+          className="view-details"
+        >
+          View Details
+
+          <ArrowRight
+            size={18}
+            className="view-arrow"
+          />
+        </Link>
+
+      </div>
+
+    </article>
   );
 }
 

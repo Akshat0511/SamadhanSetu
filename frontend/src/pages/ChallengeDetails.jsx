@@ -1,4 +1,3 @@
-// src/pages/ChallengeDetails.jsx
 
 import { useEffect, useState } from "react";
 
@@ -19,6 +18,7 @@ import {
   Target,
   Users,
   AlertCircle,
+  Image as ImageIcon,
 } from "lucide-react";
 
 import {
@@ -106,7 +106,6 @@ function ChallengeDetails() {
         data.challenge || data;
 
       setChallenge(challengeData);
-
     } catch (err) {
       console.error(
         "Challenge details error:",
@@ -152,9 +151,6 @@ function ChallengeDetails() {
         );
       }
 
-      // Get analysis from different possible
-      // backend response structures
-
       const newAnalysis =
         data.aiAnalysis ||
         data.analysis ||
@@ -168,13 +164,10 @@ function ChallengeDetails() {
         );
       }
 
-      // Update challenge with AI analysis
-
       setChallenge((prev) => ({
         ...prev,
         aiAnalysis: newAnalysis,
       }));
-
     } catch (err) {
       console.error(
         "AI ANALYSIS ERROR:",
@@ -222,7 +215,6 @@ function ChallengeDetails() {
       }
 
       setMatching(data);
-
     } catch (err) {
       console.error(
         "AI MATCHING ERROR:",
@@ -232,7 +224,7 @@ function ChallengeDetails() {
       setMatchingError(
         err.response?.data?.message ||
           err.message ||
-          "Unable to find matching universities"
+          "Unable to find matching universities and industries"
       );
     } finally {
       setMatchingLoading(false);
@@ -266,7 +258,6 @@ function ChallengeDetails() {
       <main className="challenge-page">
         <div className="error-container">
           <div className="error-card">
-
             <AlertCircle className="error-icon" />
 
             <h1>
@@ -279,7 +270,6 @@ function ChallengeDetails() {
             </p>
 
             <div className="error-actions">
-
               <button
                 onClick={fetchChallenge}
                 className="primary-button"
@@ -295,9 +285,7 @@ function ChallengeDetails() {
               >
                 Back to Challenges
               </button>
-
             </div>
-
           </div>
         </div>
       </main>
@@ -329,6 +317,15 @@ function ChallengeDetails() {
     challenge.industries ||
     [];
 
+  // -----------------------------------------------------
+  // CHALLENGE IMAGES
+  // -----------------------------------------------------
+
+  const challengeImages =
+    challenge.images ||
+    challenge.challengeImages ||
+    [];
+
   const priority = String(
     challenge.priority || "MEDIUM"
   ).toUpperCase();
@@ -349,7 +346,9 @@ function ChallengeDetails() {
   const confidenceText =
     confidence !== null
       ? confidence <= 1
-        ? `${Math.round(confidence * 100)}%`
+        ? `${Math.round(
+            confidence * 100
+          )}%`
         : `${Math.round(confidence)}%`
       : null;
 
@@ -359,7 +358,6 @@ function ChallengeDetails() {
 
   return (
     <main className="challenge-page">
-
       <div className="challenge-container">
 
         {/* =================================================
@@ -371,6 +369,7 @@ function ChallengeDetails() {
           className="back-link"
         >
           <ArrowLeft className="icon-sm" />
+
           Back to Challenges
         </Link>
 
@@ -379,13 +378,10 @@ function ChallengeDetails() {
         ================================================= */}
 
         <section className="challenge-hero-card">
-
           <div className="challenge-hero">
-
             <div className="hero-inner">
 
               <div className="hero-tags">
-
                 <span>
                   {challenge.category ||
                     "General"}
@@ -398,7 +394,6 @@ function ChallengeDetails() {
                 <span>
                   {priority} Priority
                 </span>
-
               </div>
 
               <h1>
@@ -408,7 +403,6 @@ function ChallengeDetails() {
               </h1>
 
               <div className="hero-meta">
-
                 {challenge.district && (
                   <div>
                     <MapPin className="icon-sm" />
@@ -420,23 +414,17 @@ function ChallengeDetails() {
                 {challenge.createdAt && (
                   <div>
                     Submitted{" "}
-
                     {new Date(
                       challenge.createdAt
                     ).toLocaleDateString()}
                   </div>
                 )}
-
               </div>
-
             </div>
-
           </div>
 
           <div className="challenge-description-grid">
-
             <div>
-
               <h2>
                 Problem Description
               </h2>
@@ -445,11 +433,9 @@ function ChallengeDetails() {
                 {challenge.description ||
                   "No description available for this challenge."}
               </p>
-
             </div>
 
             <div className="quick-stats">
-
               <InfoCard
                 icon={Target}
                 label="Priority"
@@ -470,12 +456,78 @@ function ChallengeDetails() {
                 label="Status"
                 value={status}
               />
+            </div>
+          </div>
+        </section>
 
+        {/* =================================================
+            SUBMITTED IMAGES
+        ================================================= */}
+
+        {challengeImages.length > 0 && (
+          <section className="content-card challenge-images-card">
+
+            <div className="panel-header">
+              <div className="section-title-group">
+
+                <div className="section-icon primary-icon">
+                  <ImageIcon className="icon-md" />
+                </div>
+
+                <div>
+                  <h3>
+                    Submitted Images
+                  </h3>
+
+                  <p>
+                    Images submitted with this challenge
+                  </p>
+                </div>
+
+              </div>
+
+              <span className="count-badge primary-count">
+                {challengeImages.length}
+              </span>
             </div>
 
-          </div>
+            <div className="challenge-images-grid">
 
-        </section>
+              {challengeImages.map(
+                (image, index) => {
+                  const imageUrl =
+                    image.imageUrl ||
+                    image.url ||
+                    image.secure_url;
+
+                  if (!imageUrl) {
+                    return null;
+                  }
+
+                  return (
+                    <div
+                      className="challenge-image-item"
+                      key={
+                        image.id ||
+                        `${imageUrl}-${index}`
+                      }
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`Challenge image ${
+                          index + 1
+                        }`}
+                        className="challenge-image"
+                        loading="lazy"
+                      />
+                    </div>
+                  );
+                }
+              )}
+
+            </div>
+          </section>
+        )}
 
         {/* =================================================
             AI ANALYSIS
@@ -488,13 +540,10 @@ function ChallengeDetails() {
             <div className="section-title-group">
 
               <div className="section-icon primary-icon">
-
                 <Sparkles className="icon-md" />
-
               </div>
 
               <div>
-
                 <h2>
                   AI Challenge Analysis
                 </h2>
@@ -503,7 +552,6 @@ function ChallengeDetails() {
                   AI-powered understanding
                   of this challenge
                 </p>
-
               </div>
 
             </div>
@@ -521,7 +569,6 @@ function ChallengeDetails() {
           ================================================= */}
 
           {!analysis && (
-
             <div className="empty-match">
 
               <AlertCircle className="empty-icon" />
@@ -535,7 +582,6 @@ function ChallengeDetails() {
                 disabled={analysisLoading}
                 className="solution-button"
               >
-
                 {analysisLoading ? (
                   <>
                     <Loader2 className="icon-sm loading-spinner" />
@@ -549,7 +595,6 @@ function ChallengeDetails() {
                     Analyze Challenge
                   </>
                 )}
-
               </button>
 
               {analysisError && (
@@ -565,7 +610,6 @@ function ChallengeDetails() {
               )}
 
             </div>
-
           )}
 
           {/* =================================================
@@ -574,7 +618,6 @@ function ChallengeDetails() {
 
           {analysis && (
             <>
-
               <div className="analysis-grid">
 
                 <AnalysisCard
@@ -607,8 +650,8 @@ function ChallengeDetails() {
 
               </div>
 
-              {recommendedSkills.length > 0 && (
-
+              {recommendedSkills.length >
+                0 && (
                 <div className="skills-section">
 
                   <h3>
@@ -619,20 +662,17 @@ function ChallengeDetails() {
 
                     {recommendedSkills.map(
                       (skill, index) => (
-
                         <span
                           key={`${skill}-${index}`}
                         >
                           {skill}
                         </span>
-
                       )
                     )}
 
                   </div>
 
                 </div>
-
               )}
 
               <div className="matching-action">
@@ -642,7 +682,6 @@ function ChallengeDetails() {
                   disabled={analysisLoading}
                   className="solution-button"
                 >
-
                   {analysisLoading ? (
                     <>
                       <Loader2 className="icon-sm loading-spinner" />
@@ -656,11 +695,9 @@ function ChallengeDetails() {
                       Re-analyze Challenge
                     </>
                   )}
-
                 </button>
 
               </div>
-
             </>
           )}
 
@@ -675,13 +712,10 @@ function ChallengeDetails() {
           <div className="matching-heading">
 
             <div className="section-icon ai-icon">
-
               <Sparkles className="icon-md" />
-
             </div>
 
             <div>
-
               <h2>
                 AI-Powered Matching
               </h2>
@@ -692,7 +726,6 @@ function ChallengeDetails() {
                 are best suited to solve
                 this challenge.
               </p>
-
             </div>
 
           </div>
@@ -711,7 +744,6 @@ function ChallengeDetails() {
               }
               className="solution-button"
             >
-
               {matchingLoading ? (
                 <>
                   <Loader2 className="icon-sm loading-spinner" />
@@ -727,7 +759,6 @@ function ChallengeDetails() {
                     : "Run AI Matching"}
                 </>
               )}
-
             </button>
 
             {!analysis && (
@@ -744,7 +775,6 @@ function ChallengeDetails() {
           ================================================= */}
 
           {matchingError && (
-
             <div className="matching-error">
 
               <AlertCircle className="icon-sm" />
@@ -754,7 +784,6 @@ function ChallengeDetails() {
               </span>
 
             </div>
-
           )}
 
           {/* =================================================
@@ -762,7 +791,6 @@ function ChallengeDetails() {
           ================================================= */}
 
           {matching && (
-
             <div className="matching-success-message">
 
               <CheckCircle2 className="icon-sm" />
@@ -771,7 +799,6 @@ function ChallengeDetails() {
               successfully.
 
             </div>
-
           )}
 
           {/* =================================================
@@ -791,13 +818,10 @@ function ChallengeDetails() {
                 <div className="section-title-group">
 
                   <div className="section-icon primary-icon">
-
                     <Building2 className="icon-md" />
-
                   </div>
 
                   <div>
-
                     <h3>
                       Recommended Universities
                     </h3>
@@ -807,7 +831,6 @@ function ChallengeDetails() {
                       research areas,
                       category and location
                     </p>
-
                   </div>
 
                 </div>
@@ -821,13 +844,11 @@ function ChallengeDetails() {
               <div className="match-list">
 
                 {universities.length > 0 ? (
-
                   universities.map(
                     (
                       university,
                       index
                     ) => (
-
                       <MatchCard
                         key={
                           university.id ||
@@ -837,12 +858,9 @@ function ChallengeDetails() {
                         item={university}
                         type="university"
                       />
-
                     )
                   )
-
                 ) : (
-
                   <EmptyMatch
                     message={
                       matching
@@ -850,7 +868,6 @@ function ChallengeDetails() {
                         : "Analyze the challenge and run AI matching to find suitable universities."
                     }
                   />
-
                 )}
 
               </div>
@@ -868,13 +885,10 @@ function ChallengeDetails() {
                 <div className="section-title-group">
 
                   <div className="section-icon industry-icon">
-
                     <Factory className="icon-md" />
-
                   </div>
 
                   <div>
-
                     <h3>
                       Industry Partners
                     </h3>
@@ -883,7 +897,6 @@ function ChallengeDetails() {
                       Organizations with
                       relevant expertise
                     </p>
-
                   </div>
 
                 </div>
@@ -897,13 +910,11 @@ function ChallengeDetails() {
               <div className="match-list">
 
                 {industries.length > 0 ? (
-
                   industries.map(
                     (
                       industry,
                       index
                     ) => (
-
                       <MatchCard
                         key={
                           industry.id ||
@@ -913,12 +924,9 @@ function ChallengeDetails() {
                         item={industry}
                         type="industry"
                       />
-
                     )
                   )
-
                 ) : (
-
                   <EmptyMatch
                     message={
                       matching
@@ -926,7 +934,6 @@ function ChallengeDetails() {
                         : "Run AI matching to find suitable industry partners."
                     }
                   />
-
                 )}
 
               </div>
@@ -942,41 +949,30 @@ function ChallengeDetails() {
         ================================================= */}
 
         {matching?.bestUniversity && (
-
           <section className="content-card action-card">
 
             <div>
-
               <h2>
                 Best University Match
               </h2>
 
               <p>
-
-                {matching.bestUniversity.name}
-
-                {" "}
-
+                {matching.bestUniversity.name}{" "}
                 has the highest compatibility
                 score for this challenge.
-
               </p>
-
             </div>
 
             <div className="score-box">
 
               <strong>
-
                 {Math.round(
                   Number(
-                    matching.bestUniversity.matchScore ||
-                    0
+                    matching.bestUniversity
+                      .matchScore || 0
                   )
                 )}
-
                 %
-
               </strong>
 
               <span>
@@ -986,7 +982,47 @@ function ChallengeDetails() {
             </div>
 
           </section>
+        )}
 
+        {/* =================================================
+            BEST INDUSTRY
+        ================================================= */}
+
+        {matching?.bestIndustry && (
+          <section className="content-card action-card">
+
+            <div>
+              <h2>
+                Best Industry Match
+              </h2>
+
+              <p>
+                {matching.bestIndustry.name}{" "}
+                has the highest compatibility
+                score among industry partners
+                for this challenge.
+              </p>
+            </div>
+
+            <div className="score-box">
+
+              <strong>
+                {Math.round(
+                  Number(
+                    matching.bestIndustry
+                      .matchScore || 0
+                  )
+                )}
+                %
+              </strong>
+
+              <span>
+                Best Match
+              </span>
+
+            </div>
+
+          </section>
         )}
 
         {/* =================================================
@@ -996,7 +1032,6 @@ function ChallengeDetails() {
         <section className="content-card action-card">
 
           <div>
-
             <h2>
               Want to contribute a solution?
             </h2>
@@ -1005,24 +1040,20 @@ function ChallengeDetails() {
               Join the collaboration network
               and help solve this challenge.
             </p>
-
           </div>
 
           <Link
             to="/solutions"
             className="solution-button"
           >
-
             <Users className="icon-sm" />
 
             Explore Solutions
-
           </Link>
 
         </section>
 
       </div>
-
     </main>
   );
 }
@@ -1040,9 +1071,7 @@ function InfoCard({
     <div className="info-card">
 
       <div className="info-icon">
-
         <Icon className="icon-sm" />
-
       </div>
 
       <div className="info-content">
@@ -1132,13 +1161,11 @@ function MatchCard({
               : "industry"
           }`}
         >
-
           {isUniversity ? (
             <Building2 className="icon-md" />
           ) : (
             <Factory className="icon-md" />
           )}
-
         </div>
 
         <div className="match-main">
@@ -1153,12 +1180,10 @@ function MatchCard({
 
               {(item.district ||
                 item.industry) && (
-
                 <p>
                   {item.district ||
                     item.industry}
                 </p>
-
               )}
 
             </div>
@@ -1177,7 +1202,9 @@ function MatchCard({
 
           </div>
 
-          {/* MATCH PROGRESS */}
+          {/* =================================================
+              MATCH PROGRESS
+          ================================================= */}
 
           <div className="match-progress">
 
@@ -1195,10 +1222,12 @@ function MatchCard({
 
           </div>
 
-          {/* MATCHED SKILLS */}
+          {/* =================================================
+              MATCHED SKILLS
+          ================================================= */}
 
-          {matchedSkills.length > 0 && (
-
+          {matchedSkills.length >
+            0 && (
             <div className="matched-skills">
 
               {matchedSkills
@@ -1208,24 +1237,22 @@ function MatchCard({
                     skill,
                     index
                   ) => (
-
                     <span
                       key={`${skill}-${index}`}
                     >
                       {skill}
                     </span>
-
                   )
                 )}
 
             </div>
-
           )}
 
-          {/* REASONS */}
+          {/* =================================================
+              REASONS
+          ================================================= */}
 
           {reasons.length > 0 && (
-
             <div className="reasons-list">
 
               {reasons
@@ -1235,34 +1262,29 @@ function MatchCard({
                     reason,
                     index
                   ) => (
-
                     <div
                       key={`${reason}-${index}`}
                     >
-
                       <CheckCircle2 className="reason-icon" />
 
                       <span>
                         {reason}
                       </span>
-
                     </div>
-
                   )
                 )}
 
             </div>
-
           )}
 
-          {/* DESCRIPTION */}
+          {/* =================================================
+              DESCRIPTION
+          ================================================= */}
 
           {item.description && (
-
             <p className="match-description">
               {item.description}
             </p>
-
           )}
 
         </div>
@@ -1298,3 +1320,4 @@ function EmptyMatch({
 // =====================================================
 
 export default ChallengeDetails;
+
