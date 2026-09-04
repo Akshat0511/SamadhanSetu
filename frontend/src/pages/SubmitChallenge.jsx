@@ -1,12 +1,13 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   ArrowLeft,
   CheckCircle2,
+  Image,
   Loader2,
   Send,
+  X,
 } from "lucide-react";
 
 import "./SubmitChallenge.css";
@@ -74,6 +75,9 @@ function SubmitChallenge() {
   const [formData, setFormData] =
     useState(INITIAL_FORM);
 
+  const [selectedImages, setSelectedImages] =
+    useState([]);
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -90,10 +94,6 @@ function SubmitChallenge() {
       const storedUser =
         localStorage.getItem("user");
 
-      /*
-      If token doesn't exist, user is not logged in.
-      */
-
       if (!token) {
         setError(
           "Please login before submitting a challenge."
@@ -101,10 +101,6 @@ function SubmitChallenge() {
 
         return;
       }
-
-      /*
-      Auto-fill contact information
-      */
 
       if (storedUser) {
         const user = JSON.parse(storedUser);
@@ -154,6 +150,67 @@ function SubmitChallenge() {
     if (success) {
       setSuccess("");
     }
+  };
+
+  /*
+  =====================================================
+  HANDLE IMAGE SELECTION
+  =====================================================
+  */
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files || []);
+
+    if (files.length === 0) {
+      return;
+    }
+
+    if (files.length > 5) {
+      setError(
+        "You can upload maximum 5 images."
+      );
+
+      e.target.value = "";
+      return;
+    }
+
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        setError(
+          "Only image files are allowed."
+        );
+
+        e.target.value = "";
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setError(
+          "Each image must be smaller than 5 MB."
+        );
+
+        e.target.value = "";
+        return;
+      }
+    }
+
+    setSelectedImages(files);
+    setError("");
+  };
+
+  /*
+  =====================================================
+  REMOVE IMAGE
+  =====================================================
+  */
+
+  const removeImage = (index) => {
+    setSelectedImages((previous) =>
+      previous.filter(
+        (_, imageIndex) =>
+          imageIndex !== index
+      )
+    );
   };
 
   /*
@@ -242,10 +299,6 @@ function SubmitChallenge() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    /*
-    Prevent double submission
-    */
-
     if (loading) {
       return;
     }
@@ -254,7 +307,9 @@ function SubmitChallenge() {
     setSuccess("");
 
     /*
-    Validate form
+    ===================================================
+    VALIDATE FORM
+    ===================================================
     */
 
     const validationError =
@@ -287,11 +342,6 @@ function SubmitChallenge() {
         : "Token NOT found"
     );
 
-    /*
-    Token is compulsory because backend route
-    uses protect middleware.
-    */
-
     if (!token) {
       setError(
         "You are not logged in. Please login first."
@@ -309,7 +359,7 @@ function SubmitChallenge() {
 
       /*
       =================================================
-      API REQUEST
+      STEP 1: CREATE CHALLENGE
       =================================================
       */
 
@@ -321,11 +371,6 @@ function SubmitChallenge() {
           headers: {
             "Content-Type":
               "application/json",
-
-            /*
-            IMPORTANT:
-            JWT TOKEN
-            */
 
             Authorization:
               `Bearer ${token}`,
@@ -364,7 +409,7 @@ function SubmitChallenge() {
 
       /*
       =================================================
-      READ RESPONSE
+      READ CHALLENGE RESPONSE
       =================================================
       */
 
@@ -425,22 +470,108 @@ function SubmitChallenge() {
 
       /*
       =================================================
+      GET CREATED CHALLENGE ID
+      =================================================
+      */
+
+      const challengeId =
+        data.challenge?.id ||
+        data.data?.challenge?.id ||
+        data.data?.id ||
+        data.challengeId ||
+        data.id;
+
+      console.log(
+        "CREATED CHALLENGE ID:",
+        challengeId
+      );
+
+      /*
+      =================================================
+      STEP 2: UPLOAD IMAGES
+      =================================================
+      */
+
+      if (selectedImages.length > 0) {
+        if (!challengeId) {
+          throw new Error(
+            "Challenge was created, but challenge ID was not returned by the server."
+          );
+        }
+
+        const imageFormData =
+          new FormData();
+
+        selectedImages.forEach(
+          (file) => {
+            imageFormData.append(
+              "images",
+              file
+            );
+          }
+        );
+
+        const imageResponse =
+          await fetch(
+            `${API_URL}/challenges/${challengeId}/images`,
+            {
+              method: "POST",
+
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+
+              body: imageFormData,
+            }
+          );
+
+        let imageData = {};
+
+        try {
+          imageData =
+            await imageResponse.json();
+        } catch (jsonError) {
+          console.error(
+            "IMAGE RESPONSE ERROR:",
+            jsonError
+          );
+        }
+
+        console.log(
+          "IMAGE UPLOAD RESPONSE:",
+          imageData
+        );
+
+        if (!imageResponse.ok) {
+          throw new Error(
+            imageData.message ||
+              "Challenge was created, but image upload failed."
+          );
+        }
+      }
+
+      /*
+      =================================================
       SUCCESS
       =================================================
       */
 
       setSuccess(
-        data.message ||
-          "Challenge submitted successfully!"
+        selectedImages.length > 0
+          ? "Challenge and photos submitted successfully!"
+          : data.message ||
+              "Challenge submitted successfully!"
       );
 
       /*
-      Reset form
+      =================================================
+      RESET FORM
+      =================================================
       */
 
-      setFormData(
-        INITIAL_FORM
-      );
+      setFormData(INITIAL_FORM);
+      setSelectedImages([]);
 
       window.scrollTo({
         top: 0,
@@ -448,7 +579,9 @@ function SubmitChallenge() {
       });
 
       /*
-      Redirect to challenges
+      =================================================
+      REDIRECT
+      =================================================
       */
 
       setTimeout(() => {
@@ -459,10 +592,6 @@ function SubmitChallenge() {
         "SUBMIT CHALLENGE ERROR:",
         err
       );
-
-      /*
-      Network error
-      */
 
       if (
         err instanceof TypeError
@@ -818,6 +947,104 @@ function SubmitChallenge() {
                     placeholder="Village, block, ward or locality"
                     disabled={loading}
                   />
+
+                </div>
+
+                {/* ================================
+                    IMAGE UPLOAD
+                ================================= */}
+
+                <div className="form-group full-width image-upload-group">
+
+                  <label>
+                    Challenge Photos
+                  </label>
+
+                  <p className="image-upload-description">
+                    Upload photos that help
+                    explain the problem.
+                    You can upload up to 5
+                    images, maximum 5 MB each.
+                  </p>
+
+                  <label
+                    htmlFor="challengeImages"
+                    className="image-upload-box"
+                  >
+                    <Image size={30} />
+
+                    <span className="image-upload-title">
+                      Click to upload photos
+                    </span>
+
+                    <span className="image-upload-subtitle">
+                      JPG, PNG, WEBP • Maximum
+                      5 images
+                    </span>
+                  </label>
+
+                  <input
+                    id="challengeImages"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={
+                      handleImageChange
+                    }
+                    disabled={loading}
+                    className="image-file-input"
+                  />
+
+                  {/* IMAGE PREVIEWS */}
+
+                  {selectedImages.length >
+                    0 && (
+                    <div className="image-preview-grid">
+
+                      {selectedImages.map(
+                        (file, index) => (
+                          <div
+                            className="image-preview-card"
+                            key={`${file.name}-${index}`}
+                          >
+
+                            <img
+                              src={URL.createObjectURL(
+                                file
+                              )}
+                              alt={`Challenge photo ${
+                                index + 1
+                              }`}
+                            />
+
+                            <button
+                              type="button"
+                              className="remove-image-button"
+                              onClick={() =>
+                                removeImage(
+                                  index
+                                )
+                              }
+                              disabled={
+                                loading
+                              }
+                              aria-label={`Remove image ${
+                                index + 1
+                              }`}
+                            >
+                              <X size={16} />
+                            </button>
+
+                            <span>
+                              {file.name}
+                            </span>
+
+                          </div>
+                        )
+                      )}
+
+                    </div>
+                  )}
 
                 </div>
 

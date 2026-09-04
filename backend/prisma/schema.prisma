@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
 }
@@ -67,6 +68,8 @@ model Challenge {
   aiAnalysis AIAnalysis?
   project    Project?
 
+  images ChallengeImage[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -108,10 +111,10 @@ model IndustryPartner {
 }
 
 model Project {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   description String?
-  progress    Int    @default(0)
+  progress    Int     @default(0)
 
   challengeId  String  @unique
   universityId String?
@@ -149,12 +152,12 @@ model Milestone {
 }
 
 model Solution {
-  id              String   @id @default(cuid())
+  id              String @id @default(cuid())
   name            String
   description     String
   category        String
   district        String
-  peopleBenefited Int      @default(0)
+  peopleBenefited Int    @default(0)
   waterSaved      Float?
   costReduction   Float?
 
@@ -162,7 +165,7 @@ model Solution {
 }
 
 model ImpactMetric {
-  id       String   @id @default(cuid())
+  id       String  @id @default(cuid())
   metric   String
   value    Float
   unit     String?
@@ -177,4 +180,15 @@ model Notification {
   read      Boolean  @default(false)
   userId    String
   createdAt DateTime @default(now())
+}
+
+model ChallengeImage {
+  id          String    @id @default(cuid())
+  imageUrl    String
+  publicId    String?
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@index([challengeId])
 }

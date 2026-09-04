@@ -145,9 +145,9 @@ function App() {
         <Route
           path="/submit"
           element={
-            <PublicLayout>
+          <DashboardLayout>
               <SubmitChallenge />
-            </PublicLayout>
+           </DashboardLayout>
           }
         />
 
@@ -185,18 +185,18 @@ function App() {
         <Route
           path="/login"
           element={
-            <PublicLayout>
+           
               <Login />
-            </PublicLayout>
+           
           }
         />
 
         <Route
           path="/register"
           element={
-            <PublicLayout>
+            
               <Register />
-            </PublicLayout>
+           
           }
         />
 
