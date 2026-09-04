@@ -13,49 +13,28 @@ const {
 } = require("../controllers/challengeImageController");
 
 const { protect } = require("../middleware/authMiddleware");
+
 const upload = require("../middleware/upload");
 
 const router = express.Router();
 
-/*
-=====================================================
-GET ALL CHALLENGES
-=====================================================
-*/
+// ==========================================
+// CHALLENGES
+// ==========================================
+
 router.get("/", getChallenges);
 
-/*
-=====================================================
-GET MY CHALLENGES
-IMPORTANT: MUST COME BEFORE /:id
-=====================================================
-*/
+// IMPORTANT: /my must come before /:id
 router.get("/my", protect, getMyChallenges);
 
-/*
-=====================================================
-GET SINGLE CHALLENGE
-=====================================================
-*/
 router.get("/:id", getChallengeById);
 
-/*
-=====================================================
-CREATE CHALLENGE
-=====================================================
-*/
-router.post(
-  "/",
-  protect,
-  createChallenge
-);
+router.post("/", protect, createChallenge);
 
-/*
-=====================================================
-UPLOAD CHALLENGE IMAGES
-POST /api/challenges/:id/images
-=====================================================
-*/
+// ==========================================
+// CHALLENGE IMAGE UPLOAD
+// ==========================================
+
 router.post(
   "/:id/images",
   protect,
@@ -63,11 +42,10 @@ router.post(
   uploadChallengeImages
 );
 
-/*
-=====================================================
-UPDATE CHALLENGE STATUS
-=====================================================
-*/
+// ==========================================
+// STATUS
+// ==========================================
+
 router.put(
   "/:id/status",
   protect,

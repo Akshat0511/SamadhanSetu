@@ -15,11 +15,12 @@ const createChallenge = async (req, res) => {
       priority,
     } = req.body;
 
-    // -----------------------------------------------
-    // Validate required fields
-    // -----------------------------------------------
-
-    if (!title || !description || !category || !district) {
+    if (
+      !title ||
+      !description ||
+      !category ||
+      !district
+    ) {
       return res.status(400).json({
         success: false,
         message:
@@ -27,120 +28,135 @@ const createChallenge = async (req, res) => {
       });
     }
 
-    // -----------------------------------------------
-    // Get logged-in user from JWT
-    // -----------------------------------------------
-
-    const userId = req.user?.userId;
-
-    console.log("JWT DECODED USER:", req.user);
-    console.log("AUTHENTICATED USER ID:", userId);
+    const userId =
+      req.user?.userId;
 
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "User ID not found in token",
+        message:
+          "User ID not found in token",
       });
     }
 
-    // -----------------------------------------------
-    // Check user exists
-    // -----------------------------------------------
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
+    const user =
+      await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Authenticated user not found",
+        message:
+          "Authenticated user not found",
       });
     }
 
-    // -----------------------------------------------
-    // Create challenge
-    // -----------------------------------------------
+    const validPriorities = [
+      "LOW",
+      "MEDIUM",
+      "HIGH",
+      "CRITICAL",
+    ];
 
-    const challenge = await prisma.challenge.create({
-      data: {
-        title: title.trim(),
-        description: description.trim(),
-        category,
-        district,
-        location: location?.trim() || null,
+    const finalPriority =
+      validPriorities.includes(
+        priority
+      )
+        ? priority
+        : "MEDIUM";
 
-        // Use frontend priority if provided
-        priority: priority || "MEDIUM",
+    const challenge =
+      await prisma.challenge.create({
+        data: {
+          title: title.trim(),
 
-        // Connect challenge with logged-in user
-        user: {
-          connect: {
-            id: userId,
+          description:
+            description.trim(),
+
+          category:
+            category.trim(),
+
+          district:
+            district.trim(),
+
+          location:
+            location?.trim() || null,
+
+          priority:
+            finalPriority,
+
+          user: {
+            connect: {
+              id: userId,
+            },
           },
         },
-      },
 
-      // -----------------------------------------------
-      // Return user information also
-      // -----------------------------------------------
-
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            district: true,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              district: true,
+            },
           },
         },
-      },
-    });
-
-    // -----------------------------------------------
-    // Success response
-    // -----------------------------------------------
+      });
 
     return res.status(201).json({
       success: true,
-      message: "Challenge created successfully",
+      message:
+        "Challenge created successfully",
       challenge,
     });
   } catch (error) {
-    console.error("CREATE CHALLENGE ERROR:", error);
+    console.error(
+      "CREATE CHALLENGE ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Failed to submit challenge",
+      message:
+        "Failed to submit challenge",
       error: error.message,
     });
   }
 };
 
-
 // =====================================================
 // GET ALL CHALLENGES
 // =====================================================
 
-const getChallenges = async (req, res) => {
+const getChallenges = async (
+  req,
+  res
+) => {
   try {
-    const challenges = await prisma.challenge.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            district: true,
-          },
+    const challenges =
+      await prisma.challenge.findMany({
+        orderBy: {
+          createdAt: "desc",
         },
-      },
-    });
+
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              district: true,
+            },
+          },
+
+          aiAnalysis: true,
+
+          images: true,
+        },
+      });
 
     return res.status(200).json({
       success: true,
@@ -148,45 +164,64 @@ const getChallenges = async (req, res) => {
       challenges,
     });
   } catch (error) {
-    console.error("GET CHALLENGES ERROR:", error);
+    console.error(
+      "GET CHALLENGES ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch challenges",
+      message:
+        "Failed to fetch challenges",
     });
   }
 };
-
 
 // =====================================================
 // GET SINGLE CHALLENGE
 // =====================================================
 
-const getChallengeById = async (req, res) => {
+const getChallengeById = async (
+  req,
+  res
+) => {
   try {
     const { id } = req.params;
 
-    const challenge = await prisma.challenge.findUnique({
-      where: {
-        id,
-      },
+    const challenge =
+      await prisma.challenge.findUnique({
+        where: {
+          id,
+        },
 
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            district: true,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              district: true,
+            },
+          },
+
+          aiAnalysis: true,
+
+          images: true,
+
+          project: {
+            include: {
+              university: true,
+              industry: true,
+            },
           },
         },
-      },
-    });
+      });
 
     if (!challenge) {
       return res.status(404).json({
         success: false,
-        message: "Challenge not found",
+        message:
+          "Challenge not found",
       });
     }
 
@@ -195,35 +230,45 @@ const getChallengeById = async (req, res) => {
       challenge,
     });
   } catch (error) {
-    console.error("GET CHALLENGE ERROR:", error);
+    console.error(
+      "GET CHALLENGE ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch challenge",
+      message:
+        "Failed to fetch challenge",
     });
   }
 };
-
 
 // =====================================================
 // UPDATE CHALLENGE STATUS
 // =====================================================
 
-const updateChallengeStatus = async (req, res) => {
+const updateChallengeStatus = async (
+  req,
+  res
+) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
+    // MUST MATCH PRISMA ENUM
     const allowedStatuses = [
-      "SUBMITTED",
+      "PENDING",
       "UNDER_REVIEW",
+      "VERIFIED",
       "ASSIGNED",
       "IN_PROGRESS",
-      "RESOLVED",
+      "COMPLETED",
       "REJECTED",
     ];
 
-    if (!allowedStatuses.includes(status)) {
+    if (
+      !allowedStatuses.includes(status)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Invalid status",
@@ -240,71 +285,88 @@ const updateChallengeStatus = async (req, res) => {
     if (!existingChallenge) {
       return res.status(404).json({
         success: false,
-        message: "Challenge not found",
+        message:
+          "Challenge not found",
       });
     }
 
-    const challenge = await prisma.challenge.update({
-      where: {
-        id,
-      },
+    const challenge =
+      await prisma.challenge.update({
+        where: {
+          id,
+        },
 
-      data: {
-        status,
-      },
-    });
+        data: {
+          status,
+        },
+      });
 
     return res.status(200).json({
       success: true,
-      message: "Challenge status updated successfully",
+      message:
+        "Challenge status updated successfully",
       challenge,
     });
   } catch (error) {
-    console.error("UPDATE STATUS ERROR:", error);
+    console.error(
+      "UPDATE STATUS ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Failed to update challenge status",
+      message:
+        "Failed to update challenge status",
+      error: error.message,
     });
   }
 };
-
 
 // =====================================================
 // GET MY CHALLENGES
 // =====================================================
 
-const getMyChallenges = async (req, res) => {
+const getMyChallenges = async (
+  req,
+  res
+) => {
   try {
-    const userId = req.user?.userId;
+    const userId =
+      req.user?.userId;
 
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "User ID not found in token",
+        message:
+          "User ID not found in token",
       });
     }
 
-    const challenges = await prisma.challenge.findMany({
-      where: {
-        userId,
-      },
-
-      orderBy: {
-        createdAt: "desc",
-      },
-
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            district: true,
-          },
+    const challenges =
+      await prisma.challenge.findMany({
+        where: {
+          userId,
         },
-      },
-    });
+
+        orderBy: {
+          createdAt: "desc",
+        },
+
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              district: true,
+            },
+          },
+
+          aiAnalysis: true,
+
+          images: true,
+        },
+      });
 
     return res.status(200).json({
       success: true,
@@ -312,19 +374,18 @@ const getMyChallenges = async (req, res) => {
       challenges,
     });
   } catch (error) {
-    console.error("GET MY CHALLENGES ERROR:", error);
+    console.error(
+      "GET MY CHALLENGES ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch your challenges",
+      message:
+        "Failed to fetch your challenges",
     });
   }
 };
-
-
-// =====================================================
-// EXPORT
-// =====================================================
 
 module.exports = {
   createChallenge,

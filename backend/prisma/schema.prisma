@@ -63,7 +63,7 @@ model Challenge {
   status             ChallengeStatus @default(PENDING)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
 
   aiAnalysis AIAnalysis?
   project    Project?

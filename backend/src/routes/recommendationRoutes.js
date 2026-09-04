@@ -1,20 +1,12 @@
 const express = require("express");
 
-const router = express.Router();
-
 const {
-  getRecommendations
+  getRecommendations,
 } = require("../controllers/recommendationController");
 
-// =====================================================
-// Get Recommendations
-// =====================================================
-//
-// GET
-// /api/recommendations/challenges/:challengeId
-//
-// =====================================================
+const router = express.Router();
 
+// GET /api/recommendations/challenges/:challengeId
 router.get(
   "/challenges/:challengeId",
   getRecommendations

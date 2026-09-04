@@ -1,35 +1,56 @@
 const prisma = require("../config/db");
 
-// Analyze a challenge and create AIAnalysis
+// =====================================================
+// ANALYZE CHALLENGE
+// =====================================================
+
 const analyzeChallenge = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // -------------------------------------------------
+    // Find challenge
+    // -------------------------------------------------
+
     const challenge = await prisma.challenge.findUnique({
-      where: { id }
+      where: {
+        id,
+      },
     });
 
     if (!challenge) {
       return res.status(404).json({
         success: false,
-        message: "Challenge not found"
+        message: "Challenge not found",
       });
     }
 
-    const text =
-      `${challenge.title} ${challenge.description} ${challenge.category}`
-        .toLowerCase();
+    // -------------------------------------------------
+    // Prepare text
+    // -------------------------------------------------
+
+    const text = `
+      ${challenge.title}
+      ${challenge.description}
+      ${challenge.category}
+    `
+      .toLowerCase()
+      .trim();
 
     let skills = [];
     let category = challenge.category;
     let priority = challenge.priority;
 
+    // =================================================
     // WATER
+    // =================================================
+
     if (
       text.includes("water") ||
       text.includes("drinking") ||
       text.includes("river") ||
-      text.includes("irrigation")
+      text.includes("irrigation") ||
+      text.includes("water management")
     ) {
       category = "WATER";
 
@@ -41,12 +62,16 @@ const analyzeChallenge = async (req, res) => {
       );
     }
 
+    // =================================================
     // AGRICULTURE
+    // =================================================
+
     if (
       text.includes("agriculture") ||
       text.includes("farmer") ||
       text.includes("crop") ||
-      text.includes("farming")
+      text.includes("farming") ||
+      text.includes("irrigation")
     ) {
       category = "AGRICULTURE";
 
@@ -58,11 +83,15 @@ const analyzeChallenge = async (req, res) => {
       );
     }
 
+    // =================================================
     // HEALTHCARE
+    // =================================================
+
     if (
       text.includes("health") ||
       text.includes("hospital") ||
-      text.includes("medical")
+      text.includes("medical") ||
+      text.includes("medicine")
     ) {
       category = "HEALTHCARE";
 
@@ -73,11 +102,15 @@ const analyzeChallenge = async (req, res) => {
       );
     }
 
+    // =================================================
     // EDUCATION
+    // =================================================
+
     if (
       text.includes("education") ||
       text.includes("school") ||
-      text.includes("student")
+      text.includes("student") ||
+      text.includes("college")
     ) {
       category = "EDUCATION";
 
@@ -88,12 +121,16 @@ const analyzeChallenge = async (req, res) => {
       );
     }
 
+    // =================================================
     // ENVIRONMENT
+    // =================================================
+
     if (
       text.includes("pollution") ||
       text.includes("waste") ||
       text.includes("environment") ||
-      text.includes("sanitation")
+      text.includes("sanitation") ||
+      text.includes("garbage")
     ) {
       category = "ENVIRONMENT";
 
@@ -104,34 +141,121 @@ const analyzeChallenge = async (req, res) => {
       );
     }
 
-    // Remove duplicate skills
+    // =================================================
+    // RURAL LIVELIHOODS
+    // =================================================
+
+    if (
+      text.includes("livelihood") ||
+      text.includes("rural development") ||
+      text.includes("self help group") ||
+      text.includes("employment")
+    ) {
+      category = "RURAL_LIVELIHOODS";
+
+      skills.push(
+        "Rural Development",
+        "Data Analysis",
+        "Web Development"
+      );
+    }
+
+    // =================================================
+    // URBAN INFRASTRUCTURE
+    // =================================================
+
+    if (
+      text.includes("road") ||
+      text.includes("traffic") ||
+      text.includes("urban infrastructure") ||
+      text.includes("street") ||
+      text.includes("drainage")
+    ) {
+      category = "URBAN_INFRASTRUCTURE";
+
+      skills.push(
+        "Civil Engineering",
+        "IoT",
+        "Urban Planning",
+        "Data Analysis"
+      );
+    }
+
+    // =================================================
+    // ACCESSIBILITY
+    // =================================================
+
+    if (
+      text.includes("accessibility") ||
+      text.includes("disabled") ||
+      text.includes("disability") ||
+      text.includes("wheelchair")
+    ) {
+      category = "ACCESSIBILITY";
+
+      skills.push(
+        "Accessibility Technology",
+        "IoT",
+        "Web Development"
+      );
+    }
+
+    // =================================================
+    // PUBLIC SERVICE
+    // =================================================
+
+    if (
+      text.includes("public service") ||
+      text.includes("government service") ||
+      text.includes("citizen service")
+    ) {
+      category = "PUBLIC_SERVICE";
+
+      skills.push(
+        "Web Development",
+        "Data Analysis",
+        "Artificial Intelligence"
+      );
+    }
+
+    // =================================================
+    // DEFAULT SKILLS
+    // =================================================
+
     skills = [...new Set(skills)];
 
-    // Default skills
     if (skills.length === 0) {
       skills = [
         "Problem Solving",
         "Data Analysis",
-        "Technology"
+        "Technology",
       ];
     }
 
-    // Priority based on keywords
+    // =================================================
+    // PRIORITY
+    // =================================================
+
     if (
       text.includes("critical") ||
       text.includes("emergency") ||
-      text.includes("death")
+      text.includes("death") ||
+      text.includes("life threatening")
     ) {
       priority = "CRITICAL";
     } else if (
       text.includes("urgent") ||
       text.includes("shortage") ||
-      text.includes("lack")
+      text.includes("lack") ||
+      text.includes("severe")
     ) {
       priority = "HIGH";
     }
 
-    // Calculate simple impact score
+    // =================================================
+    // IMPACT SCORE
+    // =================================================
+
     let impactScore = 60;
 
     if (challenge.affectedPopulation) {
@@ -141,63 +265,20 @@ const analyzeChallenge = async (req, res) => {
         impactScore = 85;
       } else if (challenge.affectedPopulation > 1000) {
         impactScore = 75;
+      } else {
+        impactScore = 65;
       }
     }
 
-    // Find universities
-    const universities = await prisma.university.findMany();
+    // =================================================
+    // SAVE AI ANALYSIS
+    // =================================================
 
-    const recommendedUniversities = universities
-      .map((university) => {
-        let score = 0;
-
-        university.researchAreas.forEach((area) => {
-          skills.forEach((skill) => {
-            if (
-              area.toLowerCase().includes(skill.toLowerCase()) ||
-              skill.toLowerCase().includes(area.toLowerCase())
-            ) {
-              score += 20;
-            }
-          });
-        });
-
-        university.departments.forEach((department) => {
-          skills.forEach((skill) => {
-            if (
-              department.toLowerCase().includes(skill.toLowerCase()) ||
-              skill.toLowerCase().includes(department.toLowerCase())
-            ) {
-              score += 10;
-            }
-          });
-        });
-
-        // Same district bonus
-        if (
-          university.district.toLowerCase() ===
-          challenge.district.toLowerCase()
-        ) {
-          score += 10;
-        }
-
-        score = Math.min(score, 100);
-
-        return {
-          id: university.id,
-          name: university.name,
-          district: university.district,
-          matchScore: score
-        };
-      })
-      .filter((u) => u.matchScore > 0)
-      .sort((a, b) => b.matchScore - a.matchScore);
-
-    // Save AI analysis
     const analysis = await prisma.aIAnalysis.upsert({
       where: {
-        challengeId: challenge.id
+        challengeId: challenge.id,
       },
+
       update: {
         category,
         confidence: 0.90,
@@ -205,10 +286,10 @@ const analyzeChallenge = async (req, res) => {
         duplicateDetected: false,
         duplicateScore: 0,
         recommendedSkills: skills,
-        recommendedUniversities:
-          recommendedUniversities.map((u) => u.name),
-        impactScore
+        recommendedUniversities: [],
+        impactScore,
       },
+
       create: {
         challengeId: challenge.id,
         category,
@@ -217,29 +298,43 @@ const analyzeChallenge = async (req, res) => {
         duplicateDetected: false,
         duplicateScore: 0,
         recommendedSkills: skills,
-        recommendedUniversities:
-          recommendedUniversities.map((u) => u.name),
-        impactScore
-      }
+        recommendedUniversities: [],
+        impactScore,
+      },
     });
 
-    return res.json({
+    // =================================================
+    // RESPONSE
+    // =================================================
+
+    return res.status(200).json({
       success: true,
       message: "Challenge analyzed successfully",
-      analysis,
-      recommendedUniversities
-    });
 
+      analysis: {
+        id: analysis.id,
+        challengeId: analysis.challengeId,
+        category: analysis.category,
+        confidence: analysis.confidence,
+        priority: analysis.priority,
+        duplicateDetected: analysis.duplicateDetected,
+        recommendedSkills: analysis.recommendedSkills,
+        recommendedUniversities:
+          analysis.recommendedUniversities,
+        impactScore: analysis.impactScore,
+      },
+    });
   } catch (error) {
     console.error("AI ANALYSIS ERROR:", error);
 
     return res.status(500).json({
       success: false,
-      message: "AI analysis failed"
+      message: "AI analysis failed",
+      error: error.message,
     });
   }
 };
 
 module.exports = {
-  analyzeChallenge
+  analyzeChallenge,
 };

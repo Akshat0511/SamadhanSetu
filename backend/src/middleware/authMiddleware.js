@@ -1,19 +1,14 @@
-
 const jwt = require("jsonwebtoken");
 
-// =====================================================
-// PROTECT ROUTES
-// =====================================================
-
-const protect = (req, res, next) => {
+const protect = (
+  req,
+  res,
+  next
+) => {
   try {
-    // ===================================================
-    // CHECK JWT SECRET
-    // ===================================================
-
     if (!process.env.JWT_SECRET) {
       console.error(
-        "JWT_SECRET is missing in .env"
+        "JWT_SECRET is missing"
       );
 
       return res.status(500).json({
@@ -23,26 +18,21 @@ const protect = (req, res, next) => {
       });
     }
 
-    // ===================================================
-    // GET AUTHORIZATION HEADER
-    // ===================================================
-
     const authHeader =
       req.headers.authorization;
 
     if (!authHeader) {
       return res.status(401).json({
         success: false,
-        message: "No token provided",
+        message:
+          "No token provided",
       });
     }
 
-    // ===================================================
-    // CHECK BEARER FORMAT
-    // ===================================================
-
     if (
-      !authHeader.startsWith("Bearer ")
+      !authHeader.startsWith(
+        "Bearer "
+      )
     ) {
       return res.status(401).json({
         success: false,
@@ -51,45 +41,24 @@ const protect = (req, res, next) => {
       });
     }
 
-    // ===================================================
-    // EXTRACT TOKEN
-    // ===================================================
-
     const token =
-      authHeader.slice(7).trim();
+      authHeader
+        .slice(7)
+        .trim();
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "No token provided",
+        message:
+          "No token provided",
       });
     }
 
-    // ===================================================
-    // VERIFY TOKEN
-    // ===================================================
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
-
-    console.log(
-      "JWT DECODED USER:",
-      decoded
-    );
-
-    // ===================================================
-    // CHECK USER ID
-    // ===================================================
-
-    /*
-      Your challengeController uses:
-
-      req.user.userId
-
-      Therefore we make sure userId exists.
-    */
+    const decoded =
+      jwt.verify(
+        token,
+        process.env.JWT_SECRET
+      );
 
     const userId =
       decoded.userId ||
@@ -97,11 +66,6 @@ const protect = (req, res, next) => {
       decoded.user_id;
 
     if (!userId) {
-      console.error(
-        "JWT does not contain user ID:",
-        decoded
-      );
-
       return res.status(401).json({
         success: false,
         message:
@@ -109,35 +73,17 @@ const protect = (req, res, next) => {
       });
     }
 
-    // ===================================================
-    // SAVE AUTHENTICATED USER
-    // ===================================================
-
     req.user = {
       ...decoded,
-      userId: userId,
+      userId,
     };
 
-    console.log(
-      "AUTHENTICATED USER ID:",
-      req.user.userId
-    );
-
-    // ===================================================
-    // CONTINUE
-    // ===================================================
-
     next();
-
   } catch (error) {
     console.error(
       "AUTH ERROR:",
       error.message
     );
-
-    // ===================================================
-    // TOKEN EXPIRED
-    // ===================================================
 
     if (
       error.name ===
@@ -150,10 +96,6 @@ const protect = (req, res, next) => {
       });
     }
 
-    // ===================================================
-    // INVALID TOKEN
-    // ===================================================
-
     if (
       error.name ===
       "JsonWebTokenError"
@@ -164,10 +106,6 @@ const protect = (req, res, next) => {
           "Invalid token. Please login again.",
       });
     }
-
-    // ===================================================
-    // OTHER AUTH ERROR
-    // ===================================================
 
     return res.status(401).json({
       success: false,
@@ -180,4 +118,3 @@ const protect = (req, res, next) => {
 module.exports = {
   protect,
 };
-

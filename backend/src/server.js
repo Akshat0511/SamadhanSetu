@@ -28,7 +28,7 @@ const recommendationRoutes = require("./routes/recommendationRoutes");
 const app = express();
 
 // ==========================================
-// SECURITY MIDDLEWARE
+// SECURITY
 // ==========================================
 
 app.use(helmet());
@@ -50,7 +50,7 @@ app.use(
         return callback(null, true);
       }
 
-      // All Vercel deployments
+      // Vercel deployments
       if (origin.endsWith(".vercel.app")) {
         return callback(null, true);
       }
@@ -58,9 +58,11 @@ app.use(
       // Reject other origins
       return callback(new Error("Not allowed by CORS"));
     },
+
     credentials: true,
   })
 );
+
 // ==========================================
 // BODY PARSER
 // ==========================================
@@ -104,7 +106,7 @@ app.use("/api/industry-partners", industryRoutes);
 // ==========================================
 
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
     success: true,
     message: "SamadhanSetu Backend is running 🚀",
   });
@@ -116,9 +118,7 @@ app.get("/", (req, res) => {
 
 app.get("/api/health", async (req, res) => {
   try {
-    await prisma.$queryRaw`
-      SELECT 1
-    `;
+    await prisma.$queryRaw`SELECT 1`;
 
     return res.status(200).json({
       success: true,
@@ -154,7 +154,7 @@ app.use((error, req, res, next) => {
 
   return res.status(500).json({
     success: false,
-    message: "Internal server error",
+    message: error.message || "Internal server error",
   });
 });
 
