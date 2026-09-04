@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import GovernmentLogin from "./pages/government/GovernmentLogin";
 import GovernmentRegister from "./pages/government/GovernmentRegister";
 import GovernmentDashboard from "./pages/government/GovernmentDashboard";
-
+import AIMatching from "./pages/AIMatching/AIMatching";
 // ===============================
 // Components
 // ===============================
@@ -56,13 +56,9 @@ function NotFound() {
 
         <h2>Page Not Found</h2>
 
-        <p>
-          The page you are looking for does not exist.
-        </p>
+        <p>The page you are looking for does not exist.</p>
 
-        <a href="/">
-          Go Home
-        </a>
+        <a href="/">Go Home</a>
       </div>
     </div>
   );
@@ -76,15 +72,11 @@ function NotFound() {
 function PublicLayout({ children }) {
   return (
     <div className="app-layout">
-
       <Navbar />
 
-      <main className="app-main">
-        {children}
-      </main>
+      <main className="app-main">{children}</main>
 
       <Footer />
-
     </div>
   );
 }
@@ -97,13 +89,9 @@ function PublicLayout({ children }) {
 function DashboardLayout({ children }) {
   return (
     <div className="dashboard-layout">
-
       <LogoutNavbar />
 
-      <main className="dashboard-main">
-        {children}
-      </main>
-
+      <main className="dashboard-main">{children}</main>
     </div>
   );
 }
@@ -115,9 +103,7 @@ function DashboardLayout({ children }) {
 function App() {
   return (
     <BrowserRouter>
-
       <Routes>
-
         {/* =================================================
             PUBLIC ROUTES
         ================================================= */}
@@ -185,37 +171,30 @@ function App() {
           }
         />
 
-
         {/* =================================================
             AUTH ROUTES
         ================================================= */}
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+        <Route path="/login" element={<Login />} />
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
-
+        <Route path="/register" element={<Register />} />
 
         {/* =================================================
             GOVERNMENT AUTH
         ================================================= */}
 
-        <Route
-          path="/government/login"
-          element={<GovernmentLogin />}
-        />
+        <Route path="/government/login" element={<GovernmentLogin />} />
+
+        <Route path="/government/register" element={<GovernmentRegister />} />
 
         <Route
-          path="/government/register"
-          element={<GovernmentRegister />}
+          path="/ai-matching/:challengeId"
+          element={
+            <DashboardLayout>
+              <AIMatching />
+            </DashboardLayout>
+          }
         />
-
-
         {/* =================================================
             CITIZEN DASHBOARD
         ================================================= */}
@@ -238,7 +217,6 @@ function App() {
           }
         />
 
-
         {/* =================================================
             UNIVERSITY DASHBOARD
         ================================================= */}
@@ -251,7 +229,6 @@ function App() {
             </DashboardLayout>
           }
         />
-
 
         {/* =================================================
             INDUSTRY DASHBOARD
@@ -266,7 +243,6 @@ function App() {
           }
         />
 
-
         {/* =================================================
             GOVERNMENT DASHBOARD
         ================================================= */}
@@ -279,7 +255,6 @@ function App() {
             </DashboardLayout>
           }
         />
-
 
         {/* =================================================
             PROJECT WORKSPACE
@@ -303,7 +278,6 @@ function App() {
           }
         />
 
-
         {/* =================================================
             404
         ================================================= */}
@@ -316,9 +290,7 @@ function App() {
             </PublicLayout>
           }
         />
-
       </Routes>
-
     </BrowserRouter>
   );
 }

@@ -6,7 +6,6 @@ const {
 
 const router = express.Router();
 
-// GET /api/matching/:challengeId
 router.get(
   "/:challengeId",
   matchChallenge

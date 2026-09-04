@@ -1,29 +1,27 @@
 const prisma = require("../config/db");
 
 // =====================================================
-// NORMALIZATION
+// HELPERS
 // =====================================================
 
 const normalize = (value) => {
   return String(value || "")
     .toLowerCase()
     .trim()
-    .replace(/[_-]/g, " ")
+    .replace(/[-_/]/g, " ")
     .replace(/\s+/g, " ");
 };
 
-const normalizeArray = (arr) => {
-  if (!Array.isArray(arr)) {
-    return [];
-  }
+const normalizeArray = (value) => {
+  if (!Array.isArray(value)) return [];
 
-  return arr
-    .map(normalize)
+  return value
+    .map((item) => normalize(item))
     .filter(Boolean);
 };
 
 // =====================================================
-// ALIASES
+// SEMANTIC ALIASES
 // =====================================================
 
 const aliases = {
@@ -34,7 +32,10 @@ const aliases = {
     "farming",
     "precision agriculture",
     "agritech",
-    "agri technology",
+    "crop",
+    "crops",
+    "farmer",
+    "farmers",
   ],
 
   water: [
@@ -44,6 +45,8 @@ const aliases = {
     "water quality monitoring",
     "irrigation",
     "water resources",
+    "drinking water",
+    "river",
   ],
 
   iot: [
@@ -122,25 +125,6 @@ const aliases = {
   civil: [
     "civil engineering",
     "civil",
-    "urban planning",
-  ],
-
-  rural: [
-    "rural development",
-    "rural livelihoods",
-    "livelihood",
-  ],
-
-  accessibility: [
-    "accessibility",
-    "assistive technology",
-    "disability technology",
-  ],
-
-  publicService: [
-    "public service",
-    "government service",
-    "citizen service",
   ],
 };
 
@@ -152,43 +136,35 @@ const semanticMatch = (value1, value2) => {
   const a = normalize(value1);
   const b = normalize(value2);
 
-  if (!a || !b) {
-    return false;
-  }
+  if (!a || !b) return false;
 
   // Exact match
   if (a === b) {
     return true;
   }
 
-  // Partial match
+  // One contains the other
   if (a.includes(b) || b.includes(a)) {
     return true;
   }
 
-  // Alias match
+  // Alias-based matching
   for (const group of Object.values(aliases)) {
-    const hasA = group.some((item) => {
-      const normalizedItem = normalize(item);
+    const aMatches = group.some(
+      (item) =>
+        a === item ||
+        a.includes(item) ||
+        item.includes(a)
+    );
 
-      return (
-        a === normalizedItem ||
-        a.includes(normalizedItem) ||
-        normalizedItem.includes(a)
-      );
-    });
+    const bMatches = group.some(
+      (item) =>
+        b === item ||
+        b.includes(item) ||
+        item.includes(b)
+    );
 
-    const hasB = group.some((item) => {
-      const normalizedItem = normalize(item);
-
-      return (
-        b === normalizedItem ||
-        b.includes(normalizedItem) ||
-        normalizedItem.includes(b)
-      );
-    });
-
-    if (hasA && hasB) {
+    if (aMatches && bMatches) {
       return true;
     }
   }
@@ -197,104 +173,143 @@ const semanticMatch = (value1, value2) => {
 };
 
 // =====================================================
-// RESEARCH AREA SCORE
-// MAX = 35
+// CHECK CATEGORY
+// =====================================================
+
+const categoryMatches = (
+  challengeCategory,
+  universityData
+) => {
+  if (!challengeCategory) {
+    return false;
+  }
+
+  const category = normalize(challengeCategory);
+
+  return universityData.some((item) =>
+    semanticMatch(category, item)
+  );
+};
+
+// =====================================================
+// INDUSTRY CATEGORY MATCH
+// =====================================================
+
+const categoryMatchesIndustry = (
+  challengeCategory,
+  industry
+) => {
+  const category = normalize(challengeCategory);
+
+  if (!category) {
+    return false;
+  }
+
+  // First check industry category
+  if (
+    semanticMatch(
+      category,
+      industry?.industry
+    )
+  ) {
+    return true;
+  }
+
+  // Then check industry expertise
+  return normalizeArray(
+    industry?.expertise
+  ).some((expertise) =>
+    semanticMatch(category, expertise)
+  );
+};
+
+// =====================================================
+// RESEARCH SCORE
+// Maximum = 35
 // =====================================================
 
 const calculateResearchScore = (
-  skills,
+  recommendedSkills,
   researchAreas
 ) => {
-  if (!skills.length || !researchAreas.length) {
+  if (
+    !recommendedSkills.length ||
+    !researchAreas.length
+  ) {
     return {
       score: 0,
-      matches: [],
+      matchedSkills: [],
     };
   }
 
-  const matches = [];
+  const matchedSkills = [];
 
-  for (const skill of skills) {
-    const found = researchAreas.find((area) =>
+  for (const skill of recommendedSkills) {
+    const matched = researchAreas.find((area) =>
       semanticMatch(skill, area)
     );
 
-    if (found && !matches.includes(skill)) {
-      matches.push(skill);
+    if (matched) {
+      matchedSkills.push(skill);
     }
   }
 
+  const uniqueMatched = [
+    ...new Set(matchedSkills),
+  ];
+
   const ratio =
-    matches.length /
-    Math.max(skills.length, 1);
+    uniqueMatched.length /
+    recommendedSkills.length;
 
   return {
     score: Math.round(
-      Math.min(ratio, 1) * 35
+      Math.min(ratio * 35, 35)
     ),
-    matches,
+    matchedSkills: uniqueMatched,
   };
 };
 
 // =====================================================
 // DEPARTMENT SCORE
-// MAX = 20
+// Maximum = 20
 // =====================================================
 
 const calculateDepartmentScore = (
-  skills,
+  recommendedSkills,
   departments
 ) => {
-  if (!skills.length || !departments.length) {
-    return {
-      score: 0,
-      matches: [],
-    };
+  if (
+    !recommendedSkills.length ||
+    !departments.length
+  ) {
+    return 0;
   }
 
-  const matches = [];
+  let matches = 0;
 
-  for (const skill of skills) {
-    const found = departments.find(
+  for (const skill of recommendedSkills) {
+    const matched = departments.some(
       (department) =>
         semanticMatch(skill, department)
     );
 
-    if (found && !matches.includes(skill)) {
-      matches.push(skill);
+    if (matched) {
+      matches++;
     }
   }
 
   const ratio =
-    matches.length /
-    Math.max(skills.length, 1);
+    matches / recommendedSkills.length;
 
-  let score = Math.round(
-    Math.min(ratio, 1) * 20
+  return Math.round(
+    Math.min(ratio * 20, 20)
   );
-
-  // General technical department bonus
-  const departmentText =
-    departments.join(" ");
-
-  const technicalMatch = skills.some(
-    (skill) =>
-      semanticMatch(skill, departmentText)
-  );
-
-  if (technicalMatch && score === 0) {
-    score = 10;
-  }
-
-  return {
-    score: Math.min(score, 20),
-    matches,
-  };
 };
 
 // =====================================================
 // CATEGORY SCORE
-// MAX = 20
+// Maximum = 20
 // =====================================================
 
 const calculateCategoryScore = (
@@ -302,72 +317,62 @@ const calculateCategoryScore = (
   researchAreas,
   departments
 ) => {
-  const normalizedCategory =
-    normalize(category);
-
-  if (!normalizedCategory) {
-    return 0;
-  }
-
-  const universityData = [
+  const allData = [
     ...researchAreas,
     ...departments,
   ];
 
-  const matched = universityData.some(
-    (item) =>
-      semanticMatch(
-        normalizedCategory,
-        item
-      )
-  );
-
-  return matched ? 20 : 0;
+  return categoryMatches(
+    category,
+    allData
+  )
+    ? 20
+    : 0;
 };
 
 // =====================================================
 // DISTRICT SCORE
-// MAX = 15
+// Maximum = 15
 // =====================================================
 
 const calculateDistrictScore = (
   challengeDistrict,
   universityDistrict
 ) => {
-  const challenge =
-    normalize(challengeDistrict);
-
-  const university =
-    normalize(universityDistrict);
-
-  if (!challenge || !university) {
+  if (
+    !challengeDistrict ||
+    !universityDistrict
+  ) {
     return 0;
   }
 
-  return challenge === university
+  return normalize(challengeDistrict) ===
+    normalize(universityDistrict)
     ? 15
     : 0;
 };
 
 // =====================================================
 // PRIORITY SCORE
-// MAX = 10
+// Maximum = 10
 // =====================================================
 
 const calculatePriorityScore = (
   priority
 ) => {
-  switch (normalize(priority)) {
-    case "critical":
+  switch (
+    String(priority || "").toUpperCase()
+  ) {
+    case "CRITICAL":
       return 10;
 
-    case "high":
+    case "HIGH":
       return 8;
 
-    case "medium":
+    case "MEDIUM":
       return 5;
 
-    case "low":
+    case "LOW":
       return 2;
 
     default:
@@ -377,226 +382,282 @@ const calculatePriorityScore = (
 
 // =====================================================
 // UNIVERSITY MATCH
+// Maximum = 100
 // =====================================================
 
-const calculateUniversityMatch = ({
+const calculateUniversityMatch = (
   challenge,
   analysis,
-  university,
-}) => {
-  const skills = normalizeArray(
-    analysis?.recommendedSkills
-  );
+  university
+) => {
+  const recommendedSkills =
+    normalizeArray(
+      analysis?.recommendedSkills
+    );
 
-  const researchAreas = normalizeArray(
-    university.researchAreas
-  );
+  const researchAreas =
+    normalizeArray(
+      university?.researchAreas
+    );
 
-  const departments = normalizeArray(
-    university.departments
-  );
+  const departments =
+    normalizeArray(
+      university?.departments
+    );
 
-  const category =
-    analysis?.category ||
-    challenge.category;
-
-  // Research
   const researchResult =
     calculateResearchScore(
-      skills,
+      recommendedSkills,
       researchAreas
     );
 
-  // Departments
-  const departmentResult =
+  const departmentScore =
     calculateDepartmentScore(
-      skills,
+      recommendedSkills,
       departments
     );
 
-  // Category
   const categoryScore =
     calculateCategoryScore(
-      category,
+      analysis?.category ||
+        challenge.category,
       researchAreas,
       departments
     );
 
-  // District
   const districtScore =
     calculateDistrictScore(
       challenge.district,
       university.district
     );
 
-  // Priority
   const priorityScore =
     calculatePriorityScore(
-      challenge.priority
+      analysis?.priority ||
+        challenge.priority
     );
 
-  const totalScore =
+  const totalScore = Math.min(
     researchResult.score +
-    departmentResult.score +
-    categoryScore +
-    districtScore +
-    priorityScore;
+      departmentScore +
+      categoryScore +
+      districtScore +
+      priorityScore,
+    100
+  );
 
   const reasons = [];
 
   if (researchResult.score > 0) {
     reasons.push(
-      `Research relevance: ${researchResult.score}/35`
+      `${researchResult.matchedSkills.length} relevant research skill(s) matched`
     );
   }
 
-  if (departmentResult.score > 0) {
+  if (departmentScore > 0) {
     reasons.push(
-      `Department relevance: ${departmentResult.score}/20`
+      "Relevant academic department found"
     );
   }
 
   if (categoryScore > 0) {
     reasons.push(
-      `Category match: ${categoryScore}/20`
+      "University research profile matches the challenge category"
     );
   }
 
   if (districtScore > 0) {
     reasons.push(
-      `Same district: ${districtScore}/15`
+      "University is located in the same district"
     );
   }
 
   if (priorityScore > 0) {
     reasons.push(
-      `Priority contribution: ${priorityScore}/10`
+      `${challenge.priority} priority challenge`
     );
   }
 
   return {
-    score: Math.min(totalScore, 100),
+    id: university.id,
+    name: university.name,
+    district: university.district,
 
-    matchedSkills: [
-      ...new Set([
-        ...researchResult.matches,
-        ...departmentResult.matches,
-      ]),
-    ],
+    matchScore: totalScore,
 
-    breakdown: {
-      researchArea: researchResult.score,
-      department: departmentResult.score,
-      category: categoryScore,
-      district: districtScore,
-      priority: priorityScore,
-    },
+    matchedSkills:
+      researchResult.matchedSkills,
 
     reasons,
+
+    breakdown: {
+      research:
+        researchResult.score,
+
+      department:
+        departmentScore,
+
+      category:
+        categoryScore,
+
+      district:
+        districtScore,
+
+      priority:
+        priorityScore,
+    },
   };
 };
 
 // =====================================================
 // INDUSTRY MATCH
+// Maximum = 100
 // =====================================================
 
-const calculateIndustryMatch = ({
+const calculateIndustryMatch = (
   challenge,
   analysis,
-  industry,
-}) => {
-  const skills = normalizeArray(
-    analysis?.recommendedSkills
-  );
+  industry
+) => {
+  const recommendedSkills =
+    normalizeArray(
+      analysis?.recommendedSkills
+    );
 
-  const expertise = normalizeArray(
-    industry.expertise
-  );
+  const expertise =
+    normalizeArray(
+      industry?.expertise
+    );
 
-  const category =
-    analysis?.category ||
-    challenge.category;
+  const challengeCategory =
+    normalize(
+      analysis?.category ||
+        challenge.category
+    );
+
+  let score = 0;
 
   const matchedSkills = [];
+  const reasons = [];
 
-  for (const skill of skills) {
-    const found = expertise.find(
+  // ---------------------------------------------------
+  // Expertise Matching
+  // Maximum = 60
+  // ---------------------------------------------------
+
+  for (const skill of recommendedSkills) {
+    const matched = expertise.find(
       (item) =>
         semanticMatch(skill, item)
     );
 
-    if (
-      found &&
-      !matchedSkills.includes(skill)
-    ) {
+    if (matched) {
       matchedSkills.push(skill);
     }
   }
 
-  // Skill score
-  const skillScore = Math.round(
-    (
-      matchedSkills.length /
-      Math.max(skills.length, 1)
-    ) * 55
-  );
+  const uniqueMatchedSkills = [
+    ...new Set(matchedSkills),
+  ];
 
-  // Category score
-  const categoryMatch =
-    semanticMatch(
-      category,
-      industry.industry
-    ) ||
-    expertise.some((item) =>
-      semanticMatch(category, item)
+  let expertiseScore = 0;
+
+  if (recommendedSkills.length > 0) {
+    expertiseScore = Math.min(
+      Math.round(
+        (uniqueMatchedSkills.length /
+          recommendedSkills.length) *
+          60
+      ),
+      60
+    );
+  }
+
+  score += expertiseScore;
+
+  // ---------------------------------------------------
+  // Industry Category Matching
+  // Maximum = 25
+  // ---------------------------------------------------
+
+  const categoryMatched =
+    categoryMatchesIndustry(
+      challengeCategory,
+      industry
     );
 
-  const categoryScore =
-    categoryMatch ? 25 : 0;
+  if (categoryMatched) {
+    score += 25;
 
+    reasons.push(
+      "Industry expertise matches the challenge category"
+    );
+  }
+
+  // ---------------------------------------------------
+  // Matched Skills Reason
+  // ---------------------------------------------------
+
+  if (
+    uniqueMatchedSkills.length > 0
+  ) {
+    reasons.push(
+      `${uniqueMatchedSkills.length} relevant expertise skill(s) matched`
+    );
+  }
+
+  // ---------------------------------------------------
   // Priority
+  // Maximum = 10
+  // ---------------------------------------------------
+
   const priorityScore =
     calculatePriorityScore(
-      challenge.priority
+      analysis?.priority ||
+        challenge.priority
     );
 
-  const totalScore =
-    skillScore +
-    categoryScore +
-    priorityScore;
-
-  const reasons = [];
-
-  if (skillScore > 0) {
-    reasons.push(
-      `Expertise relevance: ${skillScore}/55`
+  const priorityContribution =
+    Math.min(
+      priorityScore,
+      10
     );
-  }
 
-  if (categoryScore > 0) {
-    reasons.push(
-      `Industry/category relevance: ${categoryScore}/25`
-    );
-  }
+  score += priorityContribution;
 
-  if (priorityScore > 0) {
-    reasons.push(
-      `Priority contribution: ${priorityScore}/10`
-    );
-  }
+  // ---------------------------------------------------
+  // Final Result
+  // ---------------------------------------------------
 
   return {
-    score: Math.min(totalScore, 100),
+    id: industry.id,
 
-    matchedSkills,
+    name: industry.name,
 
-    breakdown: {
-      expertise: skillScore,
-      category: categoryScore,
-      priority: priorityScore,
-    },
+    industry: industry.industry,
+
+    matchScore: Math.min(
+      score,
+      100
+    ),
+
+    matchedSkills:
+      uniqueMatchedSkills,
 
     reasons,
+
+    breakdown: {
+      expertise:
+        expertiseScore,
+
+      category:
+        categoryMatched
+          ? 25
+          : 0,
+
+      priority:
+        priorityContribution,
+    },
   };
 };
 
@@ -607,6 +668,10 @@ const calculateIndustryMatch = ({
 const getMatchResults = async (
   challengeId
 ) => {
+  // ---------------------------------------------------
+  // Challenge
+  // ---------------------------------------------------
+
   const challenge =
     await prisma.challenge.findUnique({
       where: {
@@ -615,13 +680,7 @@ const getMatchResults = async (
 
       include: {
         aiAnalysis: true,
-
-        project: {
-          include: {
-            university: true,
-            industry: true,
-          },
-        },
+        project: true,
       },
     });
 
@@ -632,25 +691,21 @@ const getMatchResults = async (
   }
 
   // ---------------------------------------------------
-  // IMPORTANT
+  // AI Analysis
   // ---------------------------------------------------
 
   if (!challenge.aiAnalysis) {
-    const error = new Error(
-      "Challenge has not been analyzed yet"
+    throw new Error(
+      "AI analysis not found. Please analyze the challenge first."
     );
-
-    error.statusCode = 400;
-
-    throw error;
   }
 
   const analysis =
     challenge.aiAnalysis;
 
-  // ===================================================
-  // UNIVERSITIES
-  // ===================================================
+  // ---------------------------------------------------
+  // Universities
+  // ---------------------------------------------------
 
   const universities =
     await prisma.university.findMany({
@@ -659,59 +714,29 @@ const getMatchResults = async (
       },
     });
 
-  const universityMatches =
+  const universityResults =
     universities
-      .map((university) => {
-        const result =
-          calculateUniversityMatch({
-            challenge,
-            analysis,
-            university,
-          });
-
-        return {
-          universityId: university.id,
-          universityName: university.name,
-          district: university.district,
-          description:
-            university.description,
-
-          researchAreas:
-            university.researchAreas || [],
-
-          departments:
-            university.departments || [],
-
-          matchScore: result.score,
-
-          matchedSkills:
-            result.matchedSkills,
-
-          breakdown:
-            result.breakdown,
-
-          reasons:
-            result.reasons,
-        };
-      })
-
-      .sort(
-        (a, b) =>
-          b.matchScore -
-          a.matchScore
-      );
-
-  const topUniversities =
-    universityMatches
+      .map((university) =>
+        calculateUniversityMatch(
+          challenge,
+          analysis,
+          university
+        )
+      )
       .filter(
         (university) =>
           university.matchScore > 0
       )
+      .sort(
+        (a, b) =>
+          b.matchScore -
+          a.matchScore
+      )
       .slice(0, 5);
 
-  // ===================================================
-  // INDUSTRY PARTNERS
-  // ===================================================
+  // ---------------------------------------------------
+  // Industries
+  // ---------------------------------------------------
 
   const industries =
     await prisma.industryPartner.findMany({
@@ -720,74 +745,65 @@ const getMatchResults = async (
       },
     });
 
-  const industryMatches =
+  const industryResults =
     industries
-      .map((industry) => {
-        const result =
-          calculateIndustryMatch({
-            challenge,
-            analysis,
-            industry,
-          });
-
-        return {
-          industryId: industry.id,
-          industryName: industry.name,
-          industry: industry.industry,
-          description:
-            industry.description,
-
-          expertise:
-            industry.expertise || [],
-
-          matchScore: result.score,
-
-          matchedSkills:
-            result.matchedSkills,
-
-          breakdown:
-            result.breakdown,
-
-          reasons:
-            result.reasons,
-        };
-      })
-
-      .sort(
-        (a, b) =>
-          b.matchScore -
-          a.matchScore
-      );
-
-  const topIndustries =
-    industryMatches
+      .map((industry) =>
+        calculateIndustryMatch(
+          challenge,
+          analysis,
+          industry
+        )
+      )
       .filter(
         (industry) =>
           industry.matchScore > 0
       )
+      .sort(
+        (a, b) =>
+          b.matchScore -
+          a.matchScore
+      )
       .slice(0, 5);
 
-  // ===================================================
-  // SAVE RECOMMENDED UNIVERSITIES
-  // ===================================================
+  // ---------------------------------------------------
+  // Save Recommended Universities
+  // ---------------------------------------------------
 
   await prisma.aIAnalysis.update({
     where: {
-      challengeId,
+      id: analysis.id,
     },
 
     data: {
       recommendedUniversities:
-        topUniversities.map(
+        universityResults.map(
           (university) =>
-            university.universityName
+            university.name
         ),
     },
   });
 
-  // ===================================================
-  // RETURN
-  // ===================================================
+  // ---------------------------------------------------
+  // Best University
+  // ---------------------------------------------------
+
+  const bestUniversity =
+    universityResults.length > 0
+      ? universityResults[0]
+      : null;
+
+  // ---------------------------------------------------
+  // Best Industry
+  // ---------------------------------------------------
+
+  const bestIndustry =
+    industryResults.length > 0
+      ? industryResults[0]
+      : null;
+
+  // ---------------------------------------------------
+  // Final Response
+  // ---------------------------------------------------
 
   return {
     challenge,
@@ -795,21 +811,26 @@ const getMatchResults = async (
     analysis,
 
     universities:
-      topUniversities,
+      universityResults,
 
     industries:
-      topIndustries,
+      industryResults,
 
-    bestUniversity:
-      topUniversities[0] || null,
+    bestUniversity,
 
-    bestIndustry:
-      topIndustries[0] || null,
+    bestIndustry,
+
+    existingProject:
+      challenge.project || null,
   };
 };
 
+// =====================================================
+// EXPORTS
+// =====================================================
+
 module.exports = {
+  getMatchResults,
   calculateUniversityMatch,
   calculateIndustryMatch,
-  getMatchResults,
 };
