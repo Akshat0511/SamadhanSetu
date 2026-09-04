@@ -9,7 +9,7 @@
 }
 
 .university-dashboard .university-main {
-  padding-top: 96px;
+  padding-top: 0px;
   min-height: 100vh;
 }
 
@@ -30,7 +30,7 @@
 
 .university-dashboard .hero-content {
   min-height: 280px;
-  padding: 48px 0;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -1,14 +1,25 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // ===============================
+// Government
+// ===============================
+
+import GovernmentLogin from "./pages/government/GovernmentLogin";
+import GovernmentRegister from "./pages/government/GovernmentRegister";
+import GovernmentDashboard from "./pages/government/GovernmentDashboard";
+
+// ===============================
 // Components
 // ===============================
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import LogoutNavbar from "./components/LogoutNavbar";
+
 // ===============================
 // Public Pages
 // ===============================
+
 import Home from "./pages/Home";
 import Challenges from "./pages/Challenges";
 import ChallengeDetails from "./pages/ChallengeDetails";
@@ -20,17 +31,18 @@ import Industries from "./pages/Industries";
 // ===============================
 // Auth Pages
 // ===============================
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 // ===============================
 // Dashboard Pages
 // ===============================
+
 import CitizenDashboard from "./pages/citizen/CitizenDashboard";
 import UniversityDashboard from "./pages/university/UniversityDashboard";
-import ProjectWorkspace from "./pages/university/ProjectWorkspace";
 import IndustryDashboard from "./pages/industry/IndustryDashboard";
-import GovernmentDashboard from "./pages/government/GovernmentDashboard";
+import ProjectWorkspace from "./pages/university/ProjectWorkspace";
 
 // =====================================================
 // 404 PAGE
@@ -64,16 +76,13 @@ function NotFound() {
 function PublicLayout({ children }) {
   return (
     <div className="app-layout">
-      
-      {/* Navbar only for public pages */}
+
       <Navbar />
 
-      {/* Main Content */}
       <main className="app-main">
         {children}
       </main>
 
-      {/* Footer only for public pages */}
       <Footer />
 
     </div>
@@ -82,10 +91,8 @@ function PublicLayout({ children }) {
 
 // =====================================================
 // DASHBOARD LAYOUT
-// NO Navbar
-// NO Footer
+// Navbar + Main Content
 // =====================================================
-
 
 function DashboardLayout({ children }) {
   return (
@@ -145,9 +152,9 @@ function App() {
         <Route
           path="/submit"
           element={
-          <DashboardLayout>
+            <DashboardLayout>
               <SubmitChallenge />
-           </DashboardLayout>
+            </DashboardLayout>
           }
         />
 
@@ -178,34 +185,41 @@ function App() {
           }
         />
 
+
         {/* =================================================
             AUTH ROUTES
         ================================================= */}
 
         <Route
           path="/login"
-          element={
-           
-              <Login />
-           
-          }
+          element={<Login />}
         />
 
         <Route
           path="/register"
-          element={
-            
-              <Register />
-           
-          }
+          element={<Register />}
         />
 
+
         {/* =================================================
-            DASHBOARD ROUTES
-            Navbar + Footer REMOVED
+            GOVERNMENT AUTH
         ================================================= */}
 
-        {/* Citizen Dashboard */}
+        <Route
+          path="/government/login"
+          element={<GovernmentLogin />}
+        />
+
+        <Route
+          path="/government/register"
+          element={<GovernmentRegister />}
+        />
+
+
+        {/* =================================================
+            CITIZEN DASHBOARD
+        ================================================= */}
+
         <Route
           path="/dashboard"
           element={
@@ -224,7 +238,11 @@ function App() {
           }
         />
 
-        {/* University Dashboard */}
+
+        {/* =================================================
+            UNIVERSITY DASHBOARD
+        ================================================= */}
+
         <Route
           path="/dashboard/university"
           element={
@@ -234,9 +252,13 @@ function App() {
           }
         />
 
-        {/* Industry Dashboard */}
+
+        {/* =================================================
+            INDUSTRY DASHBOARD
+        ================================================= */}
+
         <Route
-          path="/dashboard/industries"
+          path="/dashboard/industry"
           element={
             <DashboardLayout>
               <IndustryDashboard />
@@ -244,7 +266,11 @@ function App() {
           }
         />
 
-        {/* Government Dashboard */}
+
+        {/* =================================================
+            GOVERNMENT DASHBOARD
+        ================================================= */}
+
         <Route
           path="/dashboard/government"
           element={
@@ -254,9 +280,9 @@ function App() {
           }
         />
 
+
         {/* =================================================
             PROJECT WORKSPACE
-            Navbar + Footer REMOVED
         ================================================= */}
 
         <Route
@@ -276,6 +302,7 @@ function App() {
             </DashboardLayout>
           }
         />
+
 
         {/* =================================================
             404

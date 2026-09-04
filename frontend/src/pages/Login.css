@@ -1,7 +1,6 @@
-
-/* ================================
+/* =========================================
    RESET
-================================ */
+========================================= */
 
 * {
   box-sizing: border-box;
@@ -19,50 +18,92 @@
   grid-template-columns: 1fr 1fr;
 }
 
-/* ================================
+
+/* =========================================
    LEFT SIDE
-================================ */
+========================================= */
 
 .login-left {
   position: relative;
   overflow: hidden;
   min-height: 100vh;
+
   background: linear-gradient(
     135deg,
     #07845f 0%,
     #079669 50%,
     #06a875 100%
   );
+
   color: white;
 }
+.login-left {
+ 
+  background: linear-gradient(135deg, #064e3b 0%, #047857 55%, #059669 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-left::before {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  top: -160px;
+  right: -120px;
+}
+
+.login-left::after {
+  content: "";
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  bottom: -160px;
+  left: -120px;
+}
+
+
+/* =========================================
+   BACKGROUND DECORATION
+========================================= */
 
 .left-decoration {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  opacity: 0.2;
+  opacity: 0.18;
 }
 
 .glow {
   position: absolute;
   border-radius: 50%;
-  background: white;
-  filter: blur(70px);
+  background: #ffffff;
+  filter: blur(75px);
 }
 
 .glow-one {
   width: 320px;
   height: 320px;
-  left: -80px;
-  top: 80px;
+  left: -100px;
+  top: 70px;
 }
 
 .glow-two {
-  width: 380px;
-  height: 380px;
-  right: 20px;
-  bottom: 20px;
+  width: 400px;
+  height: 400px;
+  right: -100px;
+  bottom: -80px;
 }
+
+
+/* =========================================
+   LEFT CONTENT
+========================================= */
 
 .left-content {
   position: relative;
@@ -78,13 +119,15 @@
   padding: 48px;
 }
 
-/* ================================
+
+/* =========================================
    LOGO
-================================ */
+========================================= */
 
 .desktop-logo {
   width: fit-content;
-  color: white;
+
+  color: #ffffff;
   text-decoration: none;
 }
 
@@ -98,9 +141,10 @@
   opacity: 0.7;
 }
 
-/* ================================
+
+/* =========================================
    HERO TEXT
-================================ */
+========================================= */
 
 .hero-text {
   max-width: 520px;
@@ -112,10 +156,12 @@
 
   padding: 9px 16px;
 
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
 
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.10);
+
+  color: rgba(255, 255, 255, 0.95);
 
   font-size: 14px;
   font-weight: 600;
@@ -126,6 +172,8 @@
 .hero-text h1 {
   margin: 24px 0 0;
 
+  color: #ffffff;
+
   font-size: clamp(42px, 4vw, 58px);
   line-height: 1.08;
 
@@ -134,7 +182,7 @@
 }
 
 .hero-text h1 span {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.68);
 }
 
 .hero-text p {
@@ -142,7 +190,7 @@
 
   margin-top: 24px;
 
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.76);
 
   font-size: 16px;
   line-height: 1.7;
@@ -151,14 +199,15 @@
 .copyright {
   margin: 0;
 
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.50);
 
   font-size: 13px;
 }
 
-/* ================================
+
+/* =========================================
    RIGHT SIDE
-================================ */
+========================================= */
 
 .login-right {
   min-height: 100vh;
@@ -168,6 +217,8 @@
   justify-content: center;
 
   padding: 48px 24px;
+
+  background: #ffffff;
 }
 
 .login-form-container {
@@ -175,9 +226,10 @@
   max-width: 430px;
 }
 
-/* ================================
+
+/* =========================================
    MOBILE LOGO
-================================ */
+========================================= */
 
 .mobile-logo {
   display: none;
@@ -197,9 +249,10 @@
   color: #079669;
 }
 
-/* ================================
+
+/* =========================================
    HEADING
-================================ */
+========================================= */
 
 .login-heading {
   margin-bottom: 30px;
@@ -221,7 +274,10 @@
 
   font-size: 32px;
   line-height: 1.2;
+
   font-weight: 800;
+
+  letter-spacing: -0.5px;
 }
 
 .login-heading span {
@@ -235,19 +291,21 @@
   line-height: 1.6;
 }
 
-/* ================================
-   ERROR
-================================ */
+
+/* =========================================
+   ERROR MESSAGE
+========================================= */
 
 .error-message {
   display: flex;
   align-items: flex-start;
+
   gap: 10px;
 
   margin-bottom: 24px;
   padding: 14px 16px;
 
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(220, 38, 38, 0.20);
   border-radius: 12px;
 
   background: rgba(220, 38, 38, 0.06);
@@ -267,13 +325,15 @@
   margin-top: 1px;
 }
 
-/* ================================
+
+/* =========================================
    FORM
-================================ */
+========================================= */
 
 .login-form {
   display: flex;
   flex-direction: column;
+
   gap: 20px;
 }
 
@@ -292,6 +352,11 @@
   font-weight: 700;
 }
 
+
+/* =========================================
+   PASSWORD LABEL
+========================================= */
+
 .password-label {
   display: flex;
   align-items: center;
@@ -308,7 +373,8 @@
   padding: 0;
 
   border: 0;
-  background: none;
+
+  background: transparent;
 
   color: #079669;
 
@@ -322,9 +388,10 @@
   text-decoration: underline;
 }
 
-/* ================================
+
+/* =========================================
    INPUT
-================================ */
+========================================= */
 
 .input-wrapper {
   position: relative;
@@ -344,6 +411,8 @@
   color: #98a2b3;
 
   pointer-events: none;
+
+  z-index: 2;
 }
 
 .input-wrapper input {
@@ -358,12 +427,15 @@
   outline: none;
 
   background: #ffffff;
-
   color: #172033;
 
+  font-family: inherit;
   font-size: 14px;
 
-  transition: 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
 .input-wrapper input::placeholder {
@@ -380,11 +452,13 @@
 .input-wrapper input:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+  background: #f8fafc;
 }
 
-/* ================================
+
+/* =========================================
    PASSWORD TOGGLE
-================================ */
+========================================= */
 
 .password-toggle {
   position: absolute;
@@ -401,16 +475,25 @@
 
   transform: translateY(-50%);
 
+  padding: 0;
+
   border: 0;
+
   background: transparent;
 
   color: #98a2b3;
 
   cursor: pointer;
+
+  z-index: 3;
 }
 
 .password-toggle:hover {
   color: #172033;
+}
+
+.password-toggle:disabled {
+  cursor: not-allowed;
 }
 
 .password-toggle svg {
@@ -418,9 +501,10 @@
   height: 17px;
 }
 
-/* ================================
+
+/* =========================================
    SIGN IN BUTTON
-================================ */
+========================================= */
 
 .sign-in-button {
   width: 100%;
@@ -429,6 +513,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 9px;
 
   margin-top: 3px;
@@ -438,11 +523,14 @@
 
   background: linear-gradient(
     135deg,
-    #07845f,
-    #079669
+    #07845f 0%,
+    #079669 50%,
+    #06a875 100%
   );
 
-  color: white;
+  color: #ffffff;
+
+  font-family: inherit;
 
   font-size: 14px;
   font-weight: 700;
@@ -450,16 +538,23 @@
   cursor: pointer;
 
   box-shadow:
-    0 8px 20px rgba(7, 150, 105, 0.2);
+    0 8px 20px rgba(7, 150, 105, 0.20);
 
-  transition: 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .sign-in-button:hover:not(:disabled) {
   transform: translateY(-2px);
 
   box-shadow:
-    0 12px 26px rgba(7, 150, 105, 0.25);
+    0 12px 26px rgba(7, 150, 105, 0.28);
+}
+
+.sign-in-button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .sign-in-button:disabled {
@@ -472,9 +567,10 @@
   height: 17px;
 }
 
-/* ================================
+
+/* =========================================
    LOADER
-================================ */
+========================================= */
 
 .spinner {
   animation: spin 1s linear infinite;
@@ -490,9 +586,10 @@
   }
 }
 
-/* ================================
+
+/* =========================================
    REGISTER
-================================ */
+========================================= */
 
 .register-text {
   margin-top: 30px;
@@ -510,15 +607,20 @@
   font-weight: 700;
 
   text-decoration: none;
+
+  transition: color 0.2s ease;
 }
 
 .register-text a:hover {
+  color: #07845f;
+
   text-decoration: underline;
 }
 
-/* ================================
+
+/* =========================================
    BACK HOME
-================================ */
+========================================= */
 
 .back-home {
   margin-top: 22px;
@@ -534,19 +636,38 @@
 
   text-decoration: none;
 
-  transition: 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .back-home a:hover {
   color: #079669;
 }
 
-/* ================================
+
+/* =========================================
    RESPONSIVE
-================================ */
+========================================= */
+
+@media (max-width: 1000px) {
+  .left-content {
+    padding: 40px;
+  }
+
+  .hero-text h1 {
+    font-size: 46px;
+  }
+
+  .login-right {
+    padding: 40px 24px;
+  }
+}
+
+
+/* =========================================
+   TABLET / MOBILE
+========================================= */
 
 @media (max-width: 900px) {
-
   .login-layout {
     grid-template-columns: 1fr;
   }
@@ -566,8 +687,12 @@
   }
 }
 
-@media (max-width: 500px) {
 
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 500px) {
   .login-right {
     padding: 30px 20px;
   }
@@ -580,6 +705,10 @@
     margin-bottom: 35px;
   }
 
+  .login-heading {
+    margin-bottom: 25px;
+  }
+
   .login-heading h2 {
     font-size: 27px;
   }
@@ -587,5 +716,16 @@
   .login-heading span {
     font-size: 13px;
   }
-}
 
+  .login-form {
+    gap: 17px;
+  }
+
+  .input-wrapper input {
+    height: 48px;
+  }
+
+  .sign-in-button {
+    height: 48px;
+  }
+}

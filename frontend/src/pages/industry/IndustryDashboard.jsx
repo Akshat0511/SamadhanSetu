@@ -15,32 +15,31 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-
 import { Link } from "react-router-dom";
 import API from "../../services/api";
 import "./IndustryDashboard.css";
 
-const IndustryDashboard = () => {
+function IndustryDashboard() {
   const [projects, setProjects] = useState([]);
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       setError("");
 
-      // IMPORTANT:
-      // Use Axios API instance instead of fetch().
-      // API instance automatically sends JWT token.
       const [projectsResponse, challengesResponse] = await Promise.all([
         API.get("/projects"),
         API.get("/challenges"),
       ]);
-
-      console.log("PROJECTS RESPONSE:", projectsResponse.data);
-      console.log("CHALLENGES RESPONSE:", challengesResponse.data);
 
       const projectsData =
         projectsResponse.data?.projects ||
@@ -55,25 +54,27 @@ const IndustryDashboard = () => {
       setProjects(Array.isArray(projectsData) ? projectsData : []);
       setChallenges(Array.isArray(challengesData) ? challengesData : []);
     } catch (err) {
-      console.error(
-        "INDUSTRY DASHBOARD ERROR:",
-        err.response?.data || err
-      );
+      console.error("Industry dashboard error:", err);
 
-      if (err.response?.status === 401) {
-        setError("Session expired. Please login again.");
-      } else if (err.response?.status === 403) {
-        setError("You do not have permission to access this dashboard.");
-      } else if (err.response?.status === 404) {
-        setError("Dashboard API route was not found.");
+      const status = err?.response?.status;
+
+      if (status === 401) {
+        setError("Your session has expired. Please login again.");
+      } else if (status === 403) {
+        setError("You are not authorized to access the Industry Dashboard.");
+      } else if (status === 404) {
+        setError(
+          "Dashboard API endpoint was not found. Please check the backend routes."
+        );
       } else {
         setError(
-          err.response?.data?.message ||
-            "Dashboard data load nahi ho pa raha."
+          err?.response?.data?.message ||
+            "Unable to load dashboard data. Please try again."
         );
       }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -81,107 +82,182 @@ const IndustryDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // --------------------------------------------------
-  // PROJECT STATISTICS
-  // --------------------------------------------------
+  const getProjectStatus = (project) => {
+    return String(
+      project?.status ||
+        project?.projectStatus ||
+        project?.state ||
+        "PENDING"
+    ).toUpperCase();
+  };
 
-  const totalProjects = projects.length;
+  const getProgress = (project) => {
+    const value =
+      project?.progress ??
+      project?.completionPercentage ??
+      project?.completion ??
+      0;
 
-  const activeProjects = useMemo(() => {
-    return projects.filter((project) => {
-      const status = String(project.status || "").toUpperCase();
+    const number = Number(value);
+
+    if (Number.isNaN(number)) return 0;
+
+    return Math.min(100, Math.max(0, number));
+  };
+
+  const getProjectName = (project) => {
+    return (
+      project?.name ||
+      project?.projectName ||
+      project?.title ||
+      "Untitled Project"
+    );
+  };
+
+  const getStatusClass = (status) => {
+    const normalized = String(status).toUpperCase();
+
+    if (
+      normalized === "COMPLETED" ||
+      normalized === "COMPLETE"
+    ) {
+      return "status-completed";
+    }
+
+    if (
+      normalized === "ACTIVE" ||
+      normalized === "IN_PROGRESS" ||
+      normalized === "ONGOING"
+    ) {
+      return "status-active";
+    }
+
+    if (
+      normalized === "CANCELLED" ||
+      normalized === "REJECTED"
+    ) {
+      return "status-cancelled";
+    }
+
+    return "status-pending";
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "Recently";
+
+    const parsed = new Date(date);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return "Recently";
+    }
+
+    return parsed.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const stats = useMemo(() => {
+    const totalProjects = projects.length;
+
+    const activeProjects = projects.filter((project) => {
+      const status = getProjectStatus(project);
+      const progress = getProgress(project);
 
       return (
-        status === "ACTIVE" ||
-        status === "IN_PROGRESS" ||
-        status === "ONGOING" ||
-        project.progress > 0 && project.progress < 100
+        ["ACTIVE", "IN_PROGRESS", "ONGOING"].includes(status) ||
+        (progress > 0 && progress < 100)
       );
     }).length;
-  }, [projects]);
 
-  const completedProjects = useMemo(() => {
-    return projects.filter((project) => {
-      const status = String(project.status || "").toUpperCase();
+    const completedProjects = projects.filter((project) => {
+      const status = getProjectStatus(project);
+      const progress = getProgress(project);
 
       return (
-        status === "COMPLETED" ||
-        status === "COMPLETE" ||
-        Number(project.progress) >= 100
+        ["COMPLETED", "COMPLETE"].includes(status) ||
+        progress >= 100
       );
     }).length;
-  }, [projects]);
 
-  const pendingProjects = useMemo(() => {
-    return projects.filter((project) => {
-      const status = String(project.status || "").toUpperCase();
+    const pendingProjects = projects.filter((project) => {
+      const status = getProjectStatus(project);
+      const progress = getProgress(project);
 
       return (
-        status === "PENDING" ||
-        status === "PROPOSED" ||
-        status === "NOT_STARTED" ||
-        Number(project.progress || 0) === 0
+        ["PENDING", "PROPOSED", "NOT_STARTED"].includes(status) ||
+        progress === 0
       );
     }).length;
-  }, [projects]);
 
-  // --------------------------------------------------
-  // CHALLENGE STATISTICS
-  // --------------------------------------------------
+    const assignedChallenges = challenges.filter((challenge) => {
+      const status = String(challenge?.status || "").toUpperCase();
 
-  const assignedChallenges = useMemo(() => {
-    return challenges.filter((challenge) => {
-      const status = String(challenge.status || "").toUpperCase();
-
-      return (
-        status === "ASSIGNED" ||
-        status === "IN_PROGRESS" ||
-        status === "ONGOING"
-      );
+      return ["ASSIGNED", "IN_PROGRESS", "ONGOING"].includes(status);
     }).length;
-  }, [challenges]);
 
-  const openChallenges = useMemo(() => {
-    return challenges.filter((challenge) => {
-      const status = String(challenge.status || "").toUpperCase();
+    const openChallenges = challenges.filter((challenge) => {
+      const status = String(challenge?.status || "").toUpperCase();
 
-      return (
-        status === "OPEN" ||
-        status === "PENDING" ||
-        status === "SUBMITTED"
-      );
+      return ["OPEN", "PENDING", "SUBMITTED"].includes(status);
     }).length;
-  }, [challenges]);
 
-  // --------------------------------------------------
-  // AVERAGE PROGRESS
-  // --------------------------------------------------
+    const averageProgress =
+      totalProjects > 0
+        ? Math.round(
+            projects.reduce(
+              (sum, project) => sum + getProgress(project),
+              0
+            ) / totalProjects
+          )
+        : 0;
 
-  const averageProgress = useMemo(() => {
-    if (!projects.length) return 0;
+    const institutions = new Set();
 
-    const totalProgress = projects.reduce((total, project) => {
-      const progress = Number(project.progress);
+    projects.forEach((project) => {
+      if (project?.universityId) {
+        institutions.add(project.universityId);
+      }
 
-      return total + (Number.isNaN(progress) ? 0 : progress);
-    }, 0);
+      if (project?.university?.id) {
+        institutions.add(project.university.id);
+      }
 
-    return Math.round(totalProgress / projects.length);
-  }, [projects]);
+      if (project?.university?.name) {
+        institutions.add(project.university.name);
+      }
 
-  // --------------------------------------------------
-  // RECENT PROJECTS
-  // --------------------------------------------------
+      if (project?.institution?.id) {
+        institutions.add(project.institution.id);
+      }
+
+      if (project?.institution?.name) {
+        institutions.add(project.institution.name);
+      }
+    });
+
+    return {
+      totalProjects,
+      activeProjects,
+      completedProjects,
+      pendingProjects,
+      assignedChallenges,
+      openChallenges,
+      averageProgress,
+      institutionsCount: institutions.size,
+    };
+  }, [projects, challenges]);
 
   const recentProjects = useMemo(() => {
     return [...projects]
       .sort((a, b) => {
         const dateA = new Date(
-          a.createdAt || a.updatedAt || 0
+          a?.updatedAt || a?.createdAt || 0
         ).getTime();
 
         const dateB = new Date(
-          b.createdAt || b.updatedAt || 0
+          b?.updatedAt || b?.createdAt || 0
         ).getTime();
 
         return dateB - dateA;
@@ -189,171 +265,64 @@ const IndustryDashboard = () => {
       .slice(0, 5);
   }, [projects]);
 
-  // --------------------------------------------------
-  // INSTITUTIONS
-  // --------------------------------------------------
-
-  const institutionsCount = useMemo(() => {
-    const institutions = new Set();
-
-    projects.forEach((project) => {
-      if (project.universityId) {
-        institutions.add(project.universityId);
-      }
-
-      if (project.university?.id) {
-        institutions.add(project.university.id);
-      }
-
-      if (project.university?.name) {
-        institutions.add(project.university.name);
-      }
-
-      if (project.institution?.id) {
-        institutions.add(project.institution.id);
-      }
-
-      if (project.institution?.name) {
-        institutions.add(project.institution.name);
-      }
-    });
-
-    return institutions.size;
-  }, [projects]);
-
-  // --------------------------------------------------
-  // HELPERS
-  // --------------------------------------------------
-
-  const getProjectName = (project) => {
-    return (
-      project.name ||
-      project.title ||
-      project.projectName ||
-      "Untitled Project"
-    );
-  };
-
-  const getProjectStatus = (project) => {
-    if (Number(project.progress) >= 100) {
-      return "COMPLETED";
-    }
-
-    return (
-      project.status ||
-      (Number(project.progress) > 0
-        ? "IN_PROGRESS"
-        : "PENDING")
-    );
-  };
-
-  const getStatusClass = (status) => {
-    const normalizedStatus = String(status)
-      .toLowerCase()
-      .replace(/\s+/g, "_");
-
-    if (
-      normalizedStatus === "completed" ||
-      normalizedStatus === "complete"
-    ) {
-      return "status-completed";
-    }
-
-    if (
-      normalizedStatus === "active" ||
-      normalizedStatus === "in_progress" ||
-      normalizedStatus === "ongoing"
-    ) {
-      return "status-active";
-    }
-
-    if (
-      normalizedStatus === "pending" ||
-      normalizedStatus === "proposed"
-    ) {
-      return "status-pending";
-    }
-
-    return "status-default";
-  };
-
-  const getProgress = (project) => {
-    const progress = Number(project.progress);
-
-    if (Number.isNaN(progress)) return 0;
-
-    return Math.min(Math.max(progress, 0), 100);
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "Recently";
-
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "Recently";
-    }
-
-    return parsedDate.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  // --------------------------------------------------
-  // LOADING
-  // --------------------------------------------------
-
   if (loading) {
     return (
       <main className="industry-dashboard">
         <div className="dashboard-loading">
-          <Loader2 className="loading-icon" size={40} />
+          <div className="loading-icon-wrapper">
+            <Loader2 className="loading-icon" size={40} />
+          </div>
+
           <h2>Loading Industry Dashboard...</h2>
-          <p>Please wait while we fetch your data.</p>
+
+          <p>
+            Please wait while we fetch your projects and
+            collaboration data.
+          </p>
         </div>
       </main>
     );
   }
 
-  // --------------------------------------------------
-  // MAIN DASHBOARD
-  // --------------------------------------------------
-
   return (
     <main className="industry-dashboard">
       {/* HEADER */}
       <section className="dashboard-header">
-        <div>
-          <div className="dashboard-title-row">
-            <div className="dashboard-title-icon">
-              <BriefcaseBusiness size={28} />
-            </div>
+        <div className="dashboard-title-row">
+          <div className="dashboard-title-icon">
+            <BriefcaseBusiness size={30} />
+          </div>
 
-            <div>
-              <h1>Industry Dashboard</h1>
+          <div>
+            <span className="dashboard-eyebrow">
+              INDUSTRY PORTAL
+            </span>
 
-              <p>
-                Manage collaborations, projects and challenges
-                with educational institutions.
-              </p>
-            </div>
+            <h1>Industry Dashboard</h1>
+
+            <p>
+              Manage projects, collaborate with universities and
+              discover innovative solutions.
+            </p>
           </div>
         </div>
 
         <div className="header-actions">
           <button
             className="refresh-btn"
-            onClick={fetchDashboardData}
-            title="Refresh dashboard"
+            onClick={() => fetchDashboardData(true)}
+            disabled={refreshing}
           >
-            <RefreshCw size={18} />
-            Refresh
+            <RefreshCw
+              size={17}
+              className={refreshing ? "spin" : ""}
+            />
+
+            {refreshing ? "Refreshing..." : "Refresh"}
           </button>
 
           <Link
-            to="/industry/challenges"
+            to="/challenges"
             className="primary-btn"
           >
             <Plus size={18} />
@@ -372,8 +341,8 @@ const IndustryDashboard = () => {
             <p>{error}</p>
           </div>
 
-          <button onClick={fetchDashboardData}>
-            Try Again
+          <button onClick={() => fetchDashboardData()}>
+            Retry
           </button>
         </div>
       )}
@@ -381,66 +350,66 @@ const IndustryDashboard = () => {
       {/* STATS */}
       <section className="stats-grid">
         <StatCard
-          icon={<FolderKanban size={24} />}
+          icon={<FolderKanban />}
           title="Total Projects"
-          value={totalProjects}
-          subtitle="All projects"
-          className="blue"
-        />
-
-        <StatCard
-          icon={<TrendingUp size={24} />}
-          title="Active Projects"
-          value={activeProjects}
-          subtitle="Currently running"
+          value={stats.totalProjects}
+          description="All industry projects"
           className="green"
         />
 
         <StatCard
-          icon={<CheckCircle2 size={24} />}
+          icon={<TrendingUp />}
+          title="Active Projects"
+          value={stats.activeProjects}
+          description="Currently in progress"
+          className="blue"
+        />
+
+        <StatCard
+          icon={<CheckCircle2 />}
           title="Completed"
-          value={completedProjects}
-          subtitle="Successfully completed"
+          value={stats.completedProjects}
+          description="Successfully completed"
           className="purple"
         />
 
         <StatCard
-          icon={<Clock3 size={24} />}
+          icon={<Clock3 />}
           title="Pending"
-          value={pendingProjects}
-          subtitle="Waiting to start"
+          value={stats.pendingProjects}
+          description="Awaiting progress"
           className="orange"
         />
 
         <StatCard
-          icon={<Target size={24} />}
-          title="Challenges"
-          value={challenges.length}
-          subtitle={`${openChallenges} open`}
-          className="red"
+          icon={<Lightbulb />}
+          title="Open Challenges"
+          value={stats.openChallenges}
+          description="Challenges available"
+          className="teal"
         />
 
         <StatCard
-          icon={<Handshake size={24} />}
-          title="Assigned"
-          value={assignedChallenges}
-          subtitle="Assigned challenges"
-          className="teal"
+          icon={<Handshake />}
+          title="Collaborations"
+          value={stats.institutionsCount}
+          description="Partner institutions"
+          className="indigo"
         />
       </section>
 
-      {/* MAIN CONTENT */}
-      <section className="dashboard-grid">
+      {/* MAIN GRID */}
+      <section className="dashboard-content-grid">
         {/* RECENT PROJECTS */}
         <div className="dashboard-card recent-projects-card">
           <div className="card-header">
             <div>
+              <span className="card-label">PROJECT MANAGEMENT</span>
               <h2>Recent Projects</h2>
-              <p>Your latest collaboration projects</p>
             </div>
 
             <Link
-              to="/industry/projects"
+              to="/dashboard/industry"
               className="view-all-link"
             >
               View All
@@ -451,22 +420,20 @@ const IndustryDashboard = () => {
             <EmptyState
               icon={<FolderKanban size={34} />}
               title="No projects yet"
-              description="Projects will appear here once collaborations are created."
-              link="/industry/projects"
-              linkText="View Projects"
+              description="Your industry projects will appear here."
             />
           ) : (
             <div className="project-list">
               {recentProjects.map((project, index) => {
-                const progress = getProgress(project);
                 const status = getProjectStatus(project);
+                const progress = getProgress(project);
 
                 return (
                   <div
                     className="project-item"
                     key={
-                      project.id ||
-                      project._id ||
+                      project?.id ||
+                      project?._id ||
                       `project-${index}`
                     }
                   >
@@ -483,42 +450,30 @@ const IndustryDashboard = () => {
                             status
                           )}`}
                         >
-                          {String(status)
-                            .replace(/_/g, " ")
-                            .toLowerCase()
-                            .replace(/\b\w/g, (letter) =>
-                              letter.toUpperCase()
-                            )}
+                          {status.replaceAll("_", " ")}
                         </span>
                       </div>
 
                       <p className="project-description">
-                        {project.description ||
+                        {project?.description ||
                           "No project description available."}
                       </p>
 
                       <div className="project-meta">
                         <span>
-                          {project.university?.name ||
-                            project.institution?.name ||
-                            project.universityName ||
-                            "Institution not specified"}
+                          Updated{" "}
+                          {formatDate(
+                            project?.updatedAt ||
+                              project?.createdAt
+                          )}
                         </span>
 
                         <span>
-                          {formatDate(
-                            project.createdAt ||
-                              project.updatedAt
-                          )}
+                          {progress}% complete
                         </span>
                       </div>
 
                       <div className="progress-container">
-                        <div className="progress-header">
-                          <span>Progress</span>
-                          <span>{progress}%</span>
-                        </div>
-
                         <div className="progress-bar">
                           <div
                             className="progress-fill"
@@ -536,82 +491,84 @@ const IndustryDashboard = () => {
           )}
         </div>
 
-        {/* COLLABORATION OVERVIEW */}
-        <div className="dashboard-card">
+        {/* COLLABORATION */}
+        <div className="dashboard-card collaboration-card">
           <div className="card-header">
             <div>
-              <h2>Collaboration Overview</h2>
-              <p>Current collaboration status</p>
+              <span className="card-label">COLLABORATION</span>
+              <h2>Overview</h2>
+            </div>
+
+            <div className="card-header-icon">
+              <Users size={21} />
             </div>
           </div>
 
           <div className="overview-list">
             <OverviewRow
-              icon={<FolderKanban size={20} />}
-              label="Total Projects"
-              value={totalProjects}
+              icon={<FolderKanban />}
+              title="Total Projects"
+              value={stats.totalProjects}
             />
 
             <OverviewRow
-              icon={<TrendingUp size={20} />}
-              label="Active Projects"
-              value={activeProjects}
+              icon={<TrendingUp />}
+              title="Active Projects"
+              value={stats.activeProjects}
             />
 
             <OverviewRow
-              icon={<CheckCircle2 size={20} />}
-              label="Completed Projects"
-              value={completedProjects}
+              icon={<CheckCircle2 />}
+              title="Completed Projects"
+              value={stats.completedProjects}
             />
 
             <OverviewRow
-              icon={<Clock3 size={20} />}
-              label="Pending Projects"
-              value={pendingProjects}
+              icon={<Clock3 />}
+              title="Pending Projects"
+              value={stats.pendingProjects}
             />
 
             <OverviewRow
-              icon={<Target size={20} />}
-              label="Total Challenges"
-              value={challenges.length}
-            />
-
-            <OverviewRow
-              icon={<Handshake size={20} />}
-              label="Assigned Challenges"
-              value={assignedChallenges}
+              icon={<GraduationCap />}
+              title="Partner Institutions"
+              value={stats.institutionsCount}
             />
           </div>
         </div>
       </section>
 
-      {/* SECOND ROW */}
-      <section className="dashboard-grid">
-        {/* AVERAGE PROGRESS */}
-        <div className="dashboard-card">
+      {/* ANALYTICS */}
+      <section className="analytics-grid">
+        <div className="dashboard-card progress-card">
           <div className="card-header">
             <div>
+              <span className="card-label">PERFORMANCE</span>
               <h2>Average Project Progress</h2>
-              <p>Overall progress across all projects</p>
             </div>
 
-            <TrendingUp size={22} />
+            <Target size={22} />
           </div>
 
           <div className="average-progress">
             <div className="progress-circle">
-              <span>{averageProgress}%</span>
+              <span>{stats.averageProgress}%</span>
+              <small>Average</small>
             </div>
 
             <div className="average-progress-info">
-              <h3>{averageProgress}%</h3>
-              <p>Average completion</p>
+              <h3>Project Completion</h3>
+
+              <p>
+                Average progress across all your industry
+                projects.
+              </p>
 
               <div className="large-progress-bar">
                 <div
                   className="large-progress-fill"
                   style={{
-                    width: `${averageProgress}%`,
+                    width: `${stats.averageProgress}%`,
                   }}
                 />
               </div>
@@ -619,40 +576,39 @@ const IndustryDashboard = () => {
           </div>
         </div>
 
-        {/* IMPACT */}
-        <div className="dashboard-card">
+        <div className="dashboard-card impact-card">
           <div className="card-header">
             <div>
-              <h2>Impact</h2>
-              <p>Your collaboration impact</p>
+              <span className="card-label">IMPACT</span>
+              <h2>Industry Impact</h2>
             </div>
 
-            <Lightbulb size={22} />
+            <TrendingUp size={22} />
           </div>
 
           <div className="impact-grid">
             <ImpactBox
-              icon={<GraduationCap size={24} />}
-              value={institutionsCount}
-              label="Institutions"
-            />
-
-            <ImpactBox
-              icon={<Users size={24} />}
-              value={challenges.length}
-              label="Challenges"
-            />
-
-            <ImpactBox
-              icon={<BriefcaseBusiness size={24} />}
-              value={projects.length}
+              icon={<BriefcaseBusiness />}
+              value={stats.totalProjects}
               label="Projects"
             />
 
             <ImpactBox
-              icon={<CheckCircle2 size={24} />}
-              value={completedProjects}
-              label="Completed"
+              icon={<GraduationCap />}
+              value={stats.institutionsCount}
+              label="Institutions"
+            />
+
+            <ImpactBox
+              icon={<Lightbulb />}
+              value={stats.openChallenges}
+              label="Open Challenges"
+            />
+
+            <ImpactBox
+              icon={<Handshake />}
+              value={stats.assignedChallenges}
+              label="Active Challenges"
             />
           </div>
         </div>
@@ -662,153 +618,134 @@ const IndustryDashboard = () => {
       <section className="dashboard-card quick-actions-card">
         <div className="card-header">
           <div>
+            <span className="card-label">SHORTCUTS</span>
             <h2>Quick Actions</h2>
-            <p>Common actions for industry partners</p>
           </div>
         </div>
 
         <div className="quick-actions">
           <QuickAction
-            to="/industry/challenges"
-            icon={<Target size={23} />}
-            title="Create Challenge"
-            description="Post a new real-world problem"
+            icon={<Lightbulb />}
+            title="Explore Challenges"
+            description="Find problems that need industry solutions."
+            to="/challenges"
           />
 
           <QuickAction
-            to="/industry/projects"
-            icon={<FolderKanban size={23} />}
-            title="View Projects"
-            description="Track your collaboration projects"
+            icon={<FolderKanban />}
+            title="My Projects"
+            description="Track and manage your active projects."
+            to="/dashboard/industry"
           />
 
           <QuickAction
-            to="/industry/partners"
-            icon={<Handshake size={23} />}
-            title="Collaborations"
-            description="Manage your partnerships"
+            icon={<GraduationCap />}
+            title="Universities"
+            description="Explore potential academic partners."
+            to="/universities"
           />
 
           <QuickAction
-            to="/industry/recommendations"
-            icon={<Lightbulb size={23} />}
-            title="Recommendations"
-            description="Find suitable solutions"
+            icon={<Handshake />}
+            title="Solutions"
+            description="Review innovative solutions."
+            to="/solutions"
           />
         </div>
       </section>
     </main>
   );
-};
+}
 
-// ======================================================
-// STAT CARD
-// ======================================================
-
-const StatCard = ({
+function StatCard({
   icon,
   title,
   value,
-  subtitle,
+  description,
   className = "",
-}) => {
+}) {
   return (
     <div className={`stat-card ${className}`}>
-      <div className="stat-icon">{icon}</div>
-
-      <div className="stat-content">
-        <span className="stat-title">{title}</span>
-
-        <strong className="stat-value">{value}</strong>
-
-        <span className="stat-subtitle">{subtitle}</span>
+      <div className="stat-card-top">
+        <div className="stat-icon">{icon}</div>
       </div>
+
+      <div className="stat-value">{value}</div>
+
+      <h3>{title}</h3>
+
+      <p>{description}</p>
     </div>
   );
-};
+}
 
-// ======================================================
-// OVERVIEW ROW
-// ======================================================
-
-const OverviewRow = ({ icon, label, value }) => {
+function OverviewRow({ icon, title, value }) {
   return (
     <div className="overview-row">
       <div className="overview-left">
         <div className="overview-icon">{icon}</div>
-
-        <span>{label}</span>
+        <span>{title}</span>
       </div>
 
       <strong>{value}</strong>
     </div>
   );
-};
+}
 
-// ======================================================
-// IMPACT BOX
-// ======================================================
-
-const ImpactBox = ({ icon, value, label }) => {
+function ImpactBox({ icon, value, label }) {
   return (
     <div className="impact-box">
-      <div className="impact-icon">{icon}</div>
+      <div className="impact-box-icon">{icon}</div>
 
-      <strong>{value}</strong>
-
-      <span>{label}</span>
+      <div>
+        <strong>{value}</strong>
+        <span>{label}</span>
+      </div>
     </div>
   );
-};
+}
 
-// ======================================================
-// QUICK ACTION
-// ======================================================
-
-const QuickAction = ({
-  to,
+function QuickAction({
   icon,
   title,
   description,
-}) => {
+  to,
+}) {
   return (
     <Link to={to} className="quick-action">
       <div className="quick-action-icon">{icon}</div>
 
-      <div>
+      <div className="quick-action-content">
         <h3>{title}</h3>
         <p>{description}</p>
       </div>
+
+      <span className="quick-action-open">→</span>
     </Link>
   );
-};
+}
 
-// ======================================================
-// EMPTY STATE
-// ======================================================
-
-const EmptyState = ({
+function EmptyState({
   icon,
   title,
   description,
-  link,
-  linkText,
-}) => {
+}) {
   return (
     <div className="empty-state">
-      <div className="empty-icon">{icon}</div>
+      <div className="empty-state-icon">{icon}</div>
 
       <h3>{title}</h3>
 
       <p>{description}</p>
 
-      {link && (
-        <Link to={link} className="empty-link">
-          {linkText}
-        </Link>
-      )}
+      <Link
+        to="/challenges"
+        className="empty-state-btn"
+      >
+        Explore Challenges
+      </Link>
     </div>
   );
-};
+}
 
 export default IndustryDashboard;

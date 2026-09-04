@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -10,7 +9,6 @@ import {
   Phone,
   GraduationCap,
   Factory,
-  Landmark,
   ArrowRight,
   Loader2,
   AlertCircle,
@@ -39,12 +37,6 @@ const roles = [
     description: "Provide expertise and technology",
     icon: Factory,
   },
-  {
-    value: "GOVERNMENT",
-    label: "Government",
-    description: "Manage and resolve public challenges",
-    icon: Landmark,
-  },
 ];
 
 function Register() {
@@ -68,9 +60,9 @@ function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  /* =========================
+  /* =========================================
      HANDLE INPUT
-  ========================= */
+  ========================================= */
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -84,9 +76,9 @@ function Register() {
     setSuccess("");
   };
 
-  /* =========================
+  /* =========================================
      VALIDATE FORM
-  ========================= */
+  ========================================= */
 
   const validateForm = () => {
     const name = formData.name.trim();
@@ -136,9 +128,9 @@ function Register() {
     return null;
   };
 
-  /* =========================
+  /* =========================================
      HANDLE REGISTER
-  ========================= */
+  ========================================= */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -170,7 +162,11 @@ function Register() {
         response?.message || "Registration successful!"
       );
 
-      /* Backend automatically logged in */
+      /*
+        If backend automatically logs the user in,
+        redirect according to the selected role.
+      */
+
       if (response?.token || response?.data?.token) {
         const role = String(
           response?.user?.role ||
@@ -189,12 +185,6 @@ function Register() {
             role === "INDUSTRY_ADMIN"
           ) {
             navigate("/dashboard/industry");
-          } else if (
-            role === "GOVERNMENT" ||
-            role === "GOVERNMENT_ADMIN" ||
-            role === "ADMIN"
-          ) {
-            navigate("/dashboard/government");
           } else {
             navigate("/dashboard");
           }
@@ -203,7 +193,11 @@ function Register() {
         return;
       }
 
-      /* Otherwise send user to login */
+      /*
+        If backend does not automatically log in,
+        send user to login page.
+      */
+
       setTimeout(() => {
         navigate("/login");
       }, 1200);
@@ -221,12 +215,11 @@ function Register() {
 
   return (
     <div className="register-page">
-
       <div className="register-layout">
 
-        {/* =========================
+        {/* =========================================
             LEFT PANEL
-        ========================= */}
+        ========================================= */}
 
         <div className="register-left">
 
@@ -256,8 +249,9 @@ function Register() {
 
               <p>
                 Become part of a collaborative ecosystem
-                connecting citizens, universities, industries
-                and government.
+                connecting citizens, universities and
+                industries to solve real challenges across
+                Jharkhand.
               </p>
 
               <div className="features">
@@ -278,7 +272,6 @@ function Register() {
                 />
 
               </div>
-
             </div>
 
             <p className="copyright">
@@ -288,9 +281,9 @@ function Register() {
           </div>
         </div>
 
-        {/* =========================
+        {/* =========================================
             RIGHT PANEL
-        ========================= */}
+        ========================================= */}
 
         <div className="register-right">
 
@@ -309,16 +302,15 @@ function Register() {
             {/* Heading */}
 
             <div className="register-heading">
-
               <p>Get started</p>
 
-              <h2>Create your account</h2>
+              <h2>Create your account.</h2>
 
               <span>
-                Join SamadhanSetu and help solve challenges
-                across Jharkhand.
+                Join citizens, universities and industries
+                working together to solve challenges across
+                Jharkhand.
               </span>
-
             </div>
 
             {/* Error */}
@@ -326,6 +318,7 @@ function Register() {
             {error && (
               <div className="message error-message">
                 <AlertCircle size={17} />
+
                 <span>{error}</span>
               </div>
             )}
@@ -335,9 +328,12 @@ function Register() {
             {success && (
               <div className="message success-message">
                 <CheckCircle2 size={17} />
+
                 <span>{success}</span>
               </div>
             )}
+
+            {/* Form */}
 
             <form
               onSubmit={handleSubmit}
@@ -426,7 +422,6 @@ function Register() {
                 <div className="roles-grid">
 
                   {roles.map((role) => {
-
                     const Icon = role.icon;
 
                     const selected =
@@ -499,7 +494,6 @@ function Register() {
                 disabled={loading}
                 className="submit-button"
               >
-
                 {loading ? (
                   <>
                     <Loader2
@@ -514,7 +508,6 @@ function Register() {
                     <ArrowRight size={17} />
                   </>
                 )}
-
               </button>
 
             </form>
@@ -526,6 +519,24 @@ function Register() {
               <Link to="/login">
                 Sign in
               </Link>
+            </div>
+
+            {/* Government Portal */}
+
+            <div className="government-portal-link">
+
+              <strong>
+                Government Official?
+              </strong>
+
+              <span>
+                Government accounts use a separate secure portal.
+              </span>
+
+              <Link to="/government/login">
+                Government Portal →
+              </Link>
+
             </div>
 
             {/* Back Home */}
@@ -544,9 +555,10 @@ function Register() {
   );
 }
 
-/* =========================
+
+/* =========================================
    INPUT FIELD
-========================= */
+========================================= */
 
 function InputField({
   id,
@@ -569,7 +581,10 @@ function InputField({
 
       <div className="input-wrapper">
 
-        <Icon className="input-icon" size={17} />
+        <Icon
+          className="input-icon"
+          size={17}
+        />
 
         <input
           id={id}
@@ -587,9 +602,10 @@ function InputField({
   );
 }
 
-/* =========================
+
+/* =========================================
    PASSWORD FIELD
-========================= */
+========================================= */
 
 function PasswordField({
   id,
@@ -611,12 +627,19 @@ function PasswordField({
 
       <div className="input-wrapper">
 
-        <Lock className="input-icon" size={17} />
+        <Lock
+          className="input-icon"
+          size={17}
+        />
 
         <input
           id={id}
           name={name}
-          type={showPassword ? "text" : "password"}
+          type={
+            showPassword
+              ? "text"
+              : "password"
+          }
           value={value}
           onChange={onChange}
           placeholder={placeholder}
@@ -650,9 +673,10 @@ function PasswordField({
   );
 }
 
-/* =========================
+
+/* =========================================
    FEATURE
-========================= */
+========================================= */
 
 function Feature({ title, text }) {
   return (
@@ -664,6 +688,7 @@ function Feature({ title, text }) {
       />
 
       <div>
+
         <p className="feature-title">
           {title}
         </p>
@@ -671,6 +696,7 @@ function Feature({ title, text }) {
         <p className="feature-text">
           {text}
         </p>
+
       </div>
 
     </div>
@@ -678,4 +704,3 @@ function Feature({ title, text }) {
 }
 
 export default Register;
-

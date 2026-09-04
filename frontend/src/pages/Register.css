@@ -1,4 +1,3 @@
-
 /* =========================================
    RESET
 ========================================= */
@@ -13,6 +12,7 @@
   color: #172033;
 }
 
+
 /* =========================================
    MAIN LAYOUT
 ========================================= */
@@ -20,9 +20,9 @@
 .register-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-
   min-height: 100vh;
 }
+
 
 /* =========================================
    LEFT PANEL
@@ -30,46 +30,64 @@
 
 .register-left {
   position: relative;
-
   overflow: hidden;
-
   min-height: 100vh;
-
-  background:
-    linear-gradient(
-      135deg,
-      #087f5b 0%,
-      #079669 45%,
-      #056c50 100%
-    );
-
+  background: linear-gradient(
+    135deg,
+    #087f5b 0%,
+    #079669 45%,
+    #056c50 100%
+  );
   color: #ffffff;
 }
+.register-left {
+ 
+  background: linear-gradient(135deg, #064e3b 0%, #047857 55%, #059669 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-left::before {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  top: -160px;
+  right: -120px;
+}
+
+.register-left::after {
+  content: "";
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  bottom: -160px;
+  left: -120px;
+}
+
 
 .left-decoration {
   position: absolute;
-
   inset: 0;
-
   opacity: 0.18;
-
   pointer-events: none;
 }
 
 .decoration-circle {
   position: absolute;
-
   border-radius: 50%;
-
   background: #ffffff;
-
   filter: blur(55px);
 }
 
 .circle-one {
   width: 320px;
   height: 320px;
-
   left: -100px;
   top: 80px;
 }
@@ -77,10 +95,10 @@
 .circle-two {
   width: 390px;
   height: 390px;
-
   right: -80px;
   bottom: 40px;
 }
+
 
 /* =========================================
    LEFT CONTENT
@@ -96,22 +114,17 @@
 
   width: 100%;
   min-height: 100vh;
-
   padding: 48px;
 }
 
 .brand-logo {
   display: inline-block;
-
   width: fit-content;
 
   color: inherit;
-
   font-size: 21px;
   font-weight: 900;
-
   letter-spacing: 1px;
-
   text-decoration: none;
 }
 
@@ -125,15 +138,12 @@
 
 .network-badge {
   display: inline-flex;
-
   padding: 9px 15px;
 
   border: 1px solid rgba(255, 255, 255, 0.2);
-
   border-radius: 999px;
 
   background: rgba(255, 255, 255, 0.1);
-
 
   font-size: 13px;
   font-weight: 700;
@@ -143,11 +153,8 @@
   margin: 23px 0 0;
 
   font-size: clamp(40px, 4vw, 56px);
-
   line-height: 1.12;
-
   letter-spacing: -1.5px;
-
   font-weight: 900;
 }
 
@@ -157,15 +164,13 @@
 
 .left-main-content > p {
   max-width: 450px;
-
   margin-top: 22px;
 
   color: rgba(255, 255, 255, 0.76);
-
   font-size: 15px;
-
   line-height: 1.7;
 }
+
 
 /* =========================================
    FEATURES
@@ -173,23 +178,18 @@
 
 .features {
   display: grid;
-
   gap: 18px;
-
   margin-top: 38px;
 }
 
 .feature {
   display: flex;
-
   gap: 12px;
 }
 
 .feature-icon {
   flex-shrink: 0;
-
   margin-top: 2px;
-
   color: rgba(255, 255, 255, 0.85);
 }
 
@@ -197,7 +197,6 @@
   margin: 0;
 
   font-size: 14px;
-
   font-weight: 800;
 }
 
@@ -205,9 +204,7 @@
   margin: 5px 0 0;
 
   color: rgba(255, 255, 255, 0.62);
-
   font-size: 13px;
-
   line-height: 1.55;
 }
 
@@ -215,9 +212,9 @@
   margin: 0;
 
   color: rgba(255, 255, 255, 0.5);
-
   font-size: 12px;
 }
+
 
 /* =========================================
    RIGHT PANEL
@@ -225,12 +222,10 @@
 
 .register-right {
   display: flex;
-
   align-items: center;
   justify-content: center;
 
   min-height: 100vh;
-
   padding: 40px 45px;
 
   background: #f8fafc;
@@ -238,9 +233,9 @@
 
 .register-form-container {
   width: 100%;
-
   max-width: 570px;
 }
+
 
 /* =========================================
    MOBILE LOGO
@@ -248,7 +243,6 @@
 
 .mobile-logo {
   display: none;
-
   margin-bottom: 30px;
 
   color: #172033;
@@ -256,9 +250,9 @@
 
 .mobile-logo span {
   color: #079669;
-
   opacity: 1;
 }
+
 
 /* =========================================
    HEADING
@@ -272,9 +266,7 @@
   margin: 0 0 7px;
 
   color: #079669;
-
   font-size: 13px;
-
   font-weight: 700;
 }
 
@@ -282,25 +274,20 @@
   margin: 0;
 
   color: #172033;
-
   font-size: 31px;
-
   line-height: 1.2;
-
   font-weight: 900;
 }
 
 .register-heading span {
   display: block;
-
   margin-top: 8px;
 
   color: #667085;
-
   font-size: 13px;
-
   line-height: 1.6;
 }
+
 
 /* =========================================
    MESSAGES
@@ -308,37 +295,30 @@
 
 .message {
   display: flex;
-
   align-items: flex-start;
-
   gap: 10px;
 
   margin-bottom: 19px;
-
   padding: 13px 15px;
 
   border-radius: 11px;
 
   font-size: 13px;
-
   line-height: 1.5;
 }
 
 .error-message {
   border: 1px solid rgba(220, 38, 38, 0.18);
-
   background: rgba(220, 38, 38, 0.07);
-
   color: #dc2626;
 }
 
 .success-message {
   border: 1px solid rgba(16, 185, 129, 0.2);
-
   background: rgba(16, 185, 129, 0.08);
-
   color: #059669;
 }
+
 
 /* =========================================
    FORM
@@ -346,17 +326,15 @@
 
 .register-form {
   display: grid;
-
   gap: 19px;
 }
 
 .form-row {
   display: grid;
-
   grid-template-columns: repeat(2, 1fr);
-
   gap: 18px;
 }
+
 
 /* =========================================
    INPUT
@@ -368,13 +346,10 @@
 
 .input-field > label {
   display: block;
-
   margin-bottom: 7px;
 
   color: #172033;
-
   font-size: 13px;
-
   font-weight: 700;
 }
 
@@ -384,19 +359,16 @@
 
 .input-wrapper input {
   width: 100%;
-
   height: 47px;
 
   padding: 0 14px 0 40px;
 
   border: 1px solid #d9dee7;
-
   border-radius: 11px;
 
   outline: none;
 
   background: #ffffff;
-
   color: #172033;
 
   font-size: 13px;
@@ -413,13 +385,11 @@
 .input-wrapper input:focus {
   border-color: #079669;
 
-  box-shadow:
-    0 0 0 3px rgba(7, 150, 105, 0.1);
+  box-shadow: 0 0 0 3px rgba(7, 150, 105, 0.1);
 }
 
 .input-wrapper input:disabled {
   cursor: not-allowed;
-
   opacity: 0.6;
 }
 
@@ -436,6 +406,7 @@
   pointer-events: none;
 }
 
+
 /* =========================================
    PASSWORD TOGGLE
 ========================================= */
@@ -447,7 +418,6 @@
   top: 50%;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
@@ -458,7 +428,6 @@
   border: 0;
 
   background: transparent;
-
   color: #98a2b3;
 
   cursor: pointer;
@@ -470,7 +439,6 @@
 
 .password-toggle:disabled {
   cursor: not-allowed;
-
   opacity: 0.5;
 }
 
@@ -478,29 +446,26 @@
   padding-right: 42px;
 }
 
+
 /* =========================================
    ROLE SECTION
 ========================================= */
 
 .role-section > label {
   display: block;
-
   margin-bottom: 10px;
 
   color: #172033;
-
   font-size: 13px;
-
   font-weight: 700;
 }
 
 .roles-grid {
   display: grid;
-
-  grid-template-columns: repeat(2, 1fr);
-
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
+
 
 /* =========================================
    ROLE CARD
@@ -510,9 +475,7 @@
   position: relative;
 
   display: flex;
-
   align-items: flex-start;
-
   gap: 11px;
 
   min-width: 0;
@@ -520,11 +483,9 @@
   padding: 13px;
 
   border: 1px solid #d9dee7;
-
   border-radius: 11px;
 
   background: #ffffff;
-
   color: #172033;
 
   text-align: left;
@@ -534,29 +495,28 @@
   transition:
     border-color 0.2s ease,
     background 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .role-card:hover {
   border-color: rgba(7, 150, 105, 0.4);
-
   background: #f0f8f5;
+  transform: translateY(-1px);
 }
 
 .role-card.selected {
   border-color: #079669;
-
   background: #e8f8f2;
 
-  box-shadow:
-    0 0 0 2px rgba(7, 150, 105, 0.12);
+  box-shadow: 0 0 0 2px rgba(7, 150, 105, 0.12);
 }
 
 .role-card.disabled {
   cursor: not-allowed;
-
   opacity: 0.6;
 }
+
 
 /* =========================================
    ROLE ICON
@@ -564,7 +524,6 @@
 
 .role-icon {
   display: flex;
-
   align-items: center;
   justify-content: center;
 
@@ -576,15 +535,14 @@
   border-radius: 9px;
 
   background: #eef1f3;
-
   color: #667085;
 }
 
 .role-icon.selected {
   background: #079669;
-
   color: #ffffff;
 }
+
 
 /* =========================================
    ROLE TEXT
@@ -592,7 +550,6 @@
 
 .role-text {
   display: block;
-
   min-width: 0;
 }
 
@@ -600,31 +557,25 @@
   display: block;
 
   color: #172033;
-
   font-size: 13px;
-
   font-weight: 800;
 }
 
 .role-description {
   display: block;
-
   margin-top: 4px;
 
   color: #667085;
-
   font-size: 10px;
-
   line-height: 1.5;
 }
 
 .role-check {
   flex-shrink: 0;
-
   margin-left: auto;
-
   color: #079669;
 }
+
 
 /* =========================================
    TERMS
@@ -634,11 +585,20 @@
   margin: 0;
 
   color: #667085;
-
   font-size: 11px;
-
   line-height: 1.6;
 }
+
+.terms a {
+  color: #079669;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.terms a:hover {
+  text-decoration: underline;
+}
+
 
 /* =========================================
    SUBMIT BUTTON
@@ -646,36 +606,30 @@
 
 .submit-button {
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   gap: 8px;
 
   width: 100%;
   height: 48px;
 
   border: 0;
-
   border-radius: 11px;
 
-  background:
-    linear-gradient(
-      135deg,
-      #087f5b,
-      #079669
-    );
+  background: linear-gradient(
+    135deg,
+    #087f5b,
+    #079669
+  );
 
   color: #ffffff;
 
   font-size: 13px;
-
   font-weight: 800;
 
   cursor: pointer;
 
-  box-shadow:
-    0 7px 18px rgba(7, 150, 105, 0.2);
+  box-shadow: 0 7px 18px rgba(7, 150, 105, 0.2);
 
   transition:
     transform 0.2s ease,
@@ -686,15 +640,12 @@
 .submit-button:hover {
   transform: translateY(-2px);
 
-  box-shadow:
-    0 10px 25px rgba(7, 150, 105, 0.28);
+  box-shadow: 0 10px 25px rgba(7, 150, 105, 0.28);
 }
 
 .submit-button:disabled {
   cursor: not-allowed;
-
   opacity: 0.6;
-
   transform: none;
 }
 
@@ -708,6 +659,7 @@
   }
 }
 
+
 /* =========================================
    LOGIN
 ========================================= */
@@ -716,17 +668,13 @@
   margin-top: 24px;
 
   color: #667085;
-
   font-size: 13px;
-
   text-align: center;
 }
 
 .login-link a {
   color: #079669;
-
   font-weight: 800;
-
   text-decoration: none;
 }
 
@@ -734,13 +682,60 @@
   text-decoration: underline;
 }
 
+
+/* =========================================
+   GOVERNMENT PORTAL LINK
+========================================= */
+
+.government-portal-link {
+  margin-top: 18px;
+  padding: 13px 15px;
+
+  border: 1px solid #d9dee7;
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  text-align: center;
+}
+
+.government-portal-link strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #172033;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.government-portal-link span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #667085;
+  font-size: 11px;
+}
+
+.government-portal-link a {
+  color: #079669;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.government-portal-link a:hover {
+  text-decoration: underline;
+}
+
+
 /* =========================================
    BACK HOME
 ========================================= */
 
 .back-home {
   margin-top: 17px;
-
   text-align: center;
 }
 
@@ -748,7 +743,6 @@
   color: #667085;
 
   font-size: 11px;
-
   font-weight: 700;
 
   text-decoration: none;
@@ -760,12 +754,12 @@
   color: #079669;
 }
 
+
 /* =========================================
    TABLET
 ========================================= */
 
 @media (max-width: 1050px) {
-
   .register-layout {
     grid-template-columns: 42% 58%;
   }
@@ -789,14 +783,18 @@
   .feature-text {
     font-size: 11px;
   }
+
+  .roles-grid {
+    grid-template-columns: 1fr;
+  }
 }
+
 
 /* =========================================
    MOBILE
 ========================================= */
 
 @media (max-width: 800px) {
-
   .register-layout {
     display: block;
   }
@@ -807,7 +805,6 @@
 
   .register-right {
     min-height: 100vh;
-
     padding: 35px 24px;
   }
 
@@ -818,21 +815,24 @@
   .mobile-logo {
     display: inline-block;
   }
+
+  .roles-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
+
 
 /* =========================================
    SMALL MOBILE
 ========================================= */
 
 @media (max-width: 550px) {
-
   .register-right {
     padding: 30px 18px;
   }
 
   .mobile-logo {
     margin-bottom: 25px;
-
     font-size: 19px;
   }
 
@@ -846,7 +846,6 @@
 
   .form-row {
     grid-template-columns: 1fr;
-
     gap: 19px;
   }
 
@@ -859,12 +858,12 @@
   }
 }
 
+
 /* =========================================
    VERY SMALL MOBILE
 ========================================= */
 
 @media (max-width: 380px) {
-
   .register-right {
     padding: 25px 15px;
   }
@@ -885,4 +884,3 @@
     height: 46px;
   }
 }
-
